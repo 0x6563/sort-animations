@@ -1,10 +1,8 @@
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
-const { GITHUB_REPOSITORY } = process.env;
-let base = '';
-if (GITHUB_REPOSITORY) {
-	base = GITHUB_REPOSITORY.substring(GITHUB_REPOSITORY.indexOf('/'));
-}
+const { GITHUB_REPOSITORY } = process.env; // ie. octocat/hello-world
+const base = GITHUB_REPOSITORY ? GITHUB_REPOSITORY.substring(GITHUB_REPOSITORY.indexOf('/')) : '';
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
