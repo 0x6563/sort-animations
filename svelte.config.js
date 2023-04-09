@@ -1,7 +1,10 @@
-import { readFile } from 'fs/promises';
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
-const info = JSON.parse(await readFile(new URL('./package.json', import.meta.url)));
+const { GITHUB_REPOSITORY } = process.env;
+let base = '';
+if (GITHUB_REPOSITORY) {
+	base = GITHUB_REPOSITORY.substring(GITHUB_REPOSITORY.indexOf('/'));
+}
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
@@ -12,7 +15,7 @@ const config = {
 		handler(warning);
 	},
 	kit: {
-		paths: { assets: "", base: `/${info.name}` },
+		paths: { assets: "", base },
 		adapter: adapter({
 			pages: 'docs',
 			assets: 'docs',
