@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
     import SortWorker from '@services/sort-worker?worker';
-    import { SortMethods } from '@services/sort-methods';
+    declare const SortMethods;
 </script>
 
 <script lang="ts">
@@ -117,6 +117,7 @@
         worker.addEventListener('messageerror', (e) => {
             reject(e);
         });
+        console.log({array, algorithm})
         worker.postMessage({ array, algorithm });
         return {
             value,

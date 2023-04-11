@@ -11,10 +11,9 @@ export default defineConfig({
 			'@services': resolve('./src/services'),
 		}
 	},
-	build: {
-		minify: false
+	esbuild: {
+		keepNames: true
 	},
-
 	// ...
 	// TODO: Remove once vite 4.3 is out
 	worker: {

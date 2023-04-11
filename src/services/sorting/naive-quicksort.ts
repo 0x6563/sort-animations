@@ -1,5 +1,5 @@
 import type { Item } from "@services/workspace";
-const { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom } = {} as ReturnType<import("@services/workspace").Workspace['scope']>;
+declare const { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom }: ReturnType<import("@services/workspace").Workspace['scope']>;
 
 export function NaiveQuickSort(list: Item[]) {
     if (list.length <= 1) {
