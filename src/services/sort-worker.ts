@@ -9,10 +9,10 @@ onmessage = (e) => {
 
 
 
-function SortEval(Workspace: Workspace, algorithm) {
-    let SortEval = undefined;
-    let postMessage = undefined;
-    let onmessage = undefined;
-    const { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom } = Workspace.scope();
+function SortEval(Workspace, algorithm) {
+    eval('let SortEval = undefined');
+    eval('let postMessage = undefined');
+    eval('let onmessage = undefined');
+    eval('let { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom } = Workspace.scope()');
     return eval(`(${algorithm})(Workspace.lists[0])`);
 }

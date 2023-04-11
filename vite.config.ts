@@ -11,6 +11,9 @@ export default defineConfig({
 			'@services': resolve('./src/services'),
 		}
 	},
+	build: {
+		minify: false
+	},
 
 	// ...
 	// TODO: Remove once vite 4.3 is out

@@ -20,8 +20,7 @@ const config = {
 		adapter: adapter({
 			pages: 'docs',
 			assets: 'docs',
-			fallback: 'index.html',
-			precompress: true
+			fallback: 'index.html'
 		})
 	}
 };
