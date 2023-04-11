@@ -1,11 +1,15 @@
+<script context="module" lang="ts">
+    declare const SortMethods: { SortMethods: { [key: string]: string } };
+</script>
+
 <script lang="ts">
     import ArrayGraph from '@components/array-graph.svelte';
     import Dropdown from '@components/dropdown.svelte';
-    import { SortMethods } from '@services/sort-methods';
 
     const n = 20;
     let array = Generate();
-    let algorithm = SortMethods.BubbleSort;
+    const { SortMethods: algorithms } = SortMethods;
+    let algorithm = SortMethods.SortMethods.BubbleSort;
     function Generate() {
         return Array.from({ length: n }).map(() => 1 + Math.floor(Math.random() * (n / 2)));
     }
@@ -14,7 +18,7 @@
 <div id="app" class="dark">
     <div class="topbar flx row spread">
         <div class="setting">
-            <Dropdown bind:value={algorithm} options={SortMethods}>
+            <Dropdown bind:value={algorithm} options={algorithms}>
                 <div slot="label" let:label class="flx row spread">
                     <span class="variable">{label}</span>
                 </div>

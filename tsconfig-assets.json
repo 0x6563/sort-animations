@@ -9,6 +9,7 @@
 		"skipLibCheck": true,
 		"sourceMap": false,
 		"strict": true,
+		"module": "AMD",
 		"verbatimModuleSyntax": true,
 		"noImplicitAny": false,
 		"target": "ESNext",
@@ -29,8 +30,12 @@
 			"@services/*": [
 				"src/services/*"
 			]
-		}
-	}
+		},
+		"outFile": "static/sorting.js"
+	},
+	"include": [
+		"./src/services/sort-methods.ts"
+	],
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
 	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
