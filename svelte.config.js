@@ -7,6 +7,9 @@ const base = GITHUB_REPOSITORY ? GITHUB_REPOSITORY.substring(GITHUB_REPOSITORY.i
 const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
 	// for more information about preprocessors
+	compilerOptions: {
+		preserveComments: true
+	},
 	preprocess: preprocess(),
 	onwarn(warning, handler) {
 		if (!warning.code.indexOf('a11y')) return;

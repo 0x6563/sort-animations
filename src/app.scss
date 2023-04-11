@@ -1,0 +1,114 @@
+html,
+body,
+#app {
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#app {
+
+    &.dark {
+        --accent: #598ae5;
+        --fill: #111;
+        --light-fill: #444;
+        --light-stroke: #CCC;
+        --stroke: #FFF;
+
+    }
+
+    &.light {
+        --accent: #1153d0;
+        --fill: #FFF;
+        --stroke: #111;
+        --light-stroke: #444;
+        --light-fill: #CCC;
+    }
+
+    background: var(--fill);
+    color: var(--stroke);
+
+    .flx {
+        display: flex;
+        align-items: center;
+
+        &.row {
+            flex-flow: row;
+        }
+
+        &.column {
+            flex-flow: column;
+        }
+
+        &>.shrink {
+            flex: 0 1 auto;
+        }
+
+        &>.grow {
+            flex: 1 0 auto;
+        }
+
+        &.spread {
+            justify-content: space-between;
+            width: 100%;
+
+            &>* {
+                text-align: center;
+            }
+
+            &>*:first-child {
+                text-align: left;
+            }
+
+            &>*:last-child {
+                text-align: right;
+            }
+        }
+
+        &.center {
+            justify-content: space-around;
+            width: 100%;
+
+            &>* {
+                text-align: center;
+            }
+
+            &>*:first-child {
+                text-align: right;
+            }
+
+            &>*:last-child {
+                text-align: left;
+            }
+        }
+    }
+
+    .hr {
+        height: 1px;
+        width: 100%;
+        background: var(--stroke);
+        opacity: .25;
+    }
+
+    .btn {
+        border: none;
+        outline: none;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .variable {
+        color: var(--accent);
+    }
+
+    .subtext {
+        font-style: italic;
+        color: var(--light-stroke);
+        font-size: .75em;
+    }
+}
