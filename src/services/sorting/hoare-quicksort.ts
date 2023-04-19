@@ -1,7 +1,7 @@
-import type { Item } from "@services/workspace";
-declare const { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom }: ReturnType<import("@services/workspace").Workspace['scope']>;
+import type { Value, Workspace } from "@services/workspace/workspace"
+declare const { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: ReturnType<Workspace['scope']>;
 
-export function HoareQuickSort(list: Item[]) {
+export function HoareQuickSort(list: Value[]) {
     /*!
      FROM : https://en.wikipedia.org/wiki/Quicksort
        // Sorts a (portion of an) array, divides it into partitions, then sorts those
@@ -37,7 +37,7 @@ export function HoareQuickSort(list: Item[]) {
        // Swap the elements at the left and right indices
        swap A[i] with A[j]
     */
-    function QuickSort(A: Item[], low: number, high: number) {
+    function QuickSort(A: Value[], low: number, high: number) {
         if (low >= 0 && low < high) {
             const p = Partition(A, low, high) as number;
             QuickSort(A, low, p);
@@ -46,7 +46,7 @@ export function HoareQuickSort(list: Item[]) {
 
     }
 
-    function Partition(A: Item[], low: number, high: number) {
+    function Partition(A: Value[], low: number, high: number) {
         const pivot = A[Math.floor((high - low) / 2) + low];
         let i = low - 1;
         let j = high + 1;
@@ -64,7 +64,7 @@ export function HoareQuickSort(list: Item[]) {
             if (i >= j) {
                 return j;
             }
-            Swap(A[i], A[j]);
+            Swap(A, A[i], A[j]);
         }
 
     }

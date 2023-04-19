@@ -34,7 +34,7 @@ var SortMethods = (() => {
         const c = Compare(list[i], list[i + 1]);
         if (c > 0) {
           sorted = false;
-          Swap(list[i], list[i + 1]);
+          Swap(list, list[i], list[i + 1]);
         }
       }
       max--;
@@ -99,10 +99,15 @@ var SortMethods = (() => {
         if (i >= j) {
           return j;
         }
-        Swap(A[i], A[j]);
+        Swap(A, A[i], A[j]);
       }
     }
     return QuickSort(list, 0, list.length - 1);
+  }
+
+  // src/services/sorting/javascript.ts
+  function JavaScriptSort(list) {
+    return list.sort((a, b) => Compare(a, b));
   }
 
   // src/services/sorting/lomuto-quicksort.ts
@@ -156,11 +161,11 @@ var SortMethods = (() => {
       for (let j = low; j <= high - 1; j++) {
         if (Compare(A[j], pivot) <= 0) {
           i++;
-          Swap(A[j], A[i]);
+          Swap(A, A[j], A[i]);
         }
       }
       i++;
-      Swap(A[i], A[high]);
+      Swap(A, A[i], A[high]);
       return i;
     }
     return QuickSort(list, 0, list.length - 1);
@@ -172,8 +177,10 @@ var SortMethods = (() => {
       return list;
     }
     const pivot = list[0];
+    BatchStart();
     const left = List();
     const right = List();
+    BatchEnd();
     for (let i = 1; i < list.length; i++) {
       const item = list[i];
       if (Compare(item, pivot) < 0) {
@@ -182,22 +189,23 @@ var SortMethods = (() => {
         Move(right, item);
       }
     }
-    Unhighlight();
     NaiveQuickSort(left);
     NaiveQuickSort(right);
     Move(list, pivot, left.length);
-    NoAnimate();
+    BatchStart();
     for (let i = 0; i < left.length; i++) {
       Move(list, left[i], i);
     }
-    Animate();
-    Delete(left);
-    NoAnimate();
+    BatchEnd();
+    BatchStart();
     for (let i = 0; i < right.length; i++) {
       Move(list, right[i], i + left.length + 1);
     }
-    Animate();
+    BatchEnd();
+    BatchStart();
+    Delete(left);
     Delete(right);
+    BatchEnd();
     return list;
   }
 
@@ -206,7 +214,8 @@ var SortMethods = (() => {
     BubbleSort: BubbleSort.toString(),
     LomutoQuickSort: LomutoQuickSort.toString(),
     HoareQuickSort: HoareQuickSort.toString(),
-    NaiveQuickSort: NaiveQuickSort.toString()
+    NaiveQuickSort: NaiveQuickSort.toString(),
+    JavaScriptSort: JavaScriptSort.toString()
   };
   return __toCommonJS(sort_methods_exports);
 })();

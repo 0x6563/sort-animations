@@ -1,6 +1,6 @@
-import type { Item } from "@services/workspace"
-declare const { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom }: ReturnType<import("@services/workspace").Workspace['scope']>;
-export function BubbleSort(list: Item[]) {
+import type { Value, Workspace } from "@services/workspace/workspace"
+declare const { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: ReturnType<Workspace['scope']>;
+export function BubbleSort(list: Value[]) {
     let sorted = true;
     let max = list.length - 1;
     do {
@@ -9,7 +9,7 @@ export function BubbleSort(list: Item[]) {
             const c = Compare(list[i], list[i + 1]);
             if (c > 0) {
                 sorted = false;
-                Swap(list[i], list[i + 1]);
+                Swap(list, list[i], list[i + 1]);
             }
         }
         max--;

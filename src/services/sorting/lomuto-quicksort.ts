@@ -1,7 +1,7 @@
-import type { Item } from "@services/workspace";
-declare const { Move, Swap, Compare, List, Delete, Reindex, Unhighlight, NoAnimate, Animate, Custom }: ReturnType<import("@services/workspace").Workspace['scope']>;
+import type { Value, Workspace } from "@services/workspace/workspace"
+declare const { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: ReturnType<Workspace['scope']>;
 
-export function LomutoQuickSort(list: Item[]) {
+export function LomutoQuickSort(list: Value[]) {
     /*!
     FROM : https://en.wikipedia.org/wiki/Quicksort
     // Sorts a (portion of an) array, divides it into partitions, then sorts those
@@ -37,7 +37,7 @@ export function LomutoQuickSort(list: Item[]) {
         swap A[i] with A[hi]
         return i // the pivot index
     */
-    function QuickSort(A: Item[], low: number = 0, high: number = 0) {
+    function QuickSort(A: Value[], low: number = 0, high: number = 0) {
         if (low >= high || low < 0) {
             return
         }
@@ -45,17 +45,17 @@ export function LomutoQuickSort(list: Item[]) {
         QuickSort(A, low, p - 1);
         QuickSort(A, p + 1, high);
     }
-    function Partition(A: Item[], low: number = 0, high: number = 0) {
+    function Partition(A: Value[], low: number = 0, high: number = 0) {
         const pivot = A[high];
         let i = low - 1;
         for (let j = low; j <= high - 1; j++) {
             if (Compare(A[j], pivot) <= 0) {
                 i++;
-                Swap(A[j], A[i]);
+                Swap(A, A[j], A[i]);
             }
         }
         i++;
-        Swap(A[i], A[high])
+        Swap(A, A[i], A[high])
         return i;
     }
     return QuickSort(list, 0, list.length - 1)
