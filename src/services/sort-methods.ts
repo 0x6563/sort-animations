@@ -1,13 +1,15 @@
 import { BubbleSort } from "./sorting/bubblesort"
-import { HoareQuickSort } from "./sorting/hoare-quicksort"
+import { HoareQuickSort } from "./sorting/quicksort-hoare"
 import { JavaScriptSort } from "./sorting/javascript"
-import { LomutoQuickSort } from "./sorting/lomuto-quicksort"
-import { NaiveQuickSort } from "./sorting/naive-quicksort"
+import { LomutoQuickSort } from "./sorting/quicksort-lomuto"
+import { CustomQuickSort } from "./sorting/custom-quicksort"
+import { MergeSortTopDown } from "./sorting/mergesort-topdown"
 
 export const SortMethods = {
     BubbleSort: BubbleSort.toString(),
-    LomutoQuickSort: LomutoQuickSort.toString(),
-    HoareQuickSort: HoareQuickSort.toString(),
-    NaiveQuickSort: NaiveQuickSort.toString(),
+    'QuickSort Lomuto': LomutoQuickSort.toString(),
+    'QuickSort Hoare': HoareQuickSort.toString(),
+    'MergeSort TopDown':MergeSortTopDown.toString(),
+    Custom: CustomQuickSort.toString(),
     JavaScriptSort: JavaScriptSort.toString(),
 }

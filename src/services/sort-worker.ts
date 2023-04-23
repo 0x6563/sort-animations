@@ -10,8 +10,8 @@ function SortEval(Workspace: Workspace, algorithm) {
     let SortEval = undefined;
     let postMessage = undefined;
     let onmessage = undefined;
-    let { Move, Swap, Compare, List, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom } = Workspace.scope();
+    let { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, } = Workspace.scope();
     eval(`(${algorithm})(Workspace.main)`);
     // Prevent Tree Shaking
-    return { SortEval, postMessage, onmessage, Move, Swap, Compare, List, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom };
+    return { SortEval, postMessage, onmessage, Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, };
 } 

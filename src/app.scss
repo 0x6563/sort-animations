@@ -1,3 +1,4 @@
+@import 'theme.scss';
 html,
 body,
 #app {
@@ -11,30 +12,6 @@ body,
 }
 
 #app {
-
-    &.dark {
-        --accent: #b1177f;
-        --light-accent: #c14899;
-        --dark-accent: #920a66;
-        --accent2: #cce43b;
-        --accent2-light: #d6e964;
-        --accent2-dark: #aabf2a;
-
-        --fill: #111;
-        --light-fill: #444;
-        --light-stroke: #CCC;
-        --stroke: #FFF;
-
-    }
-
-    &.light {
-        --accent: #1153d0;
-        --fill: #FFF;
-        --stroke: #111;
-        --light-stroke: #444;
-        --light-fill: #CCC;
-    }
-
     background: var(--fill);
     color: var(--stroke);
 

@@ -33,6 +33,9 @@ export class Workspace {
                 target[i] = this.copy(value[i]);
             }
             result = target;
+        } else if (value instanceof Value) {
+            result = this.constant(value.value);
+
         } else if (value && typeof value == 'object') {
             // for (const key in value) {
 
@@ -75,9 +78,6 @@ export class Workspace {
     }
 
     private detach(source: Value | List) {
-        console.group('detach')
-        let itemId = this.references.id(source);
-        let item = this.references.item(itemId);
         const parents = this.references.observer.getParents(source);
         for (const [parent, properties] of parents) {
             if (parent == this.references.tracked.array)
@@ -99,7 +99,6 @@ export class Workspace {
                 }
             }
         }
-        console.groupEnd();
     }
 
     cleanPropName(property: string) {

@@ -1,5 +1,5 @@
 import type { AnimationFrame } from "@services/types";
-import type { EventLog, EventLogEvent } from "./eventlog";
+import type { EventLogEvent } from "./eventlog";
 
 export class WorkspaceAnimation {
     animations: AnimationFrame[] = [];
@@ -154,7 +154,7 @@ export class WorkspaceAnimation {
                 }
             } else if (event == 'change') {
                 const { current, previous, target, property } = detail;
-          
+
                 if ('previous' in detail && typeof previous == 'number') {
                     if (this.stage.layout[target].linked[previous] == property) {
                         this.stage.layout[previous].linked = -1;

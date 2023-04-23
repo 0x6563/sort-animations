@@ -41,7 +41,7 @@ var SortMethods = (() => {
     } while (!sorted);
   }
 
-  // src/services/sorting/hoare-quicksort.ts
+  // src/services/sorting/quicksort-hoare.ts
   function HoareQuickSort(list) {
     /*!
      FROM : https://en.wikipedia.org/wiki/Quicksort
@@ -110,7 +110,7 @@ var SortMethods = (() => {
     return list.sort((a, b) => Compare(a, b));
   }
 
-  // src/services/sorting/lomuto-quicksort.ts
+  // src/services/sorting/quicksort-lomuto.ts
   function LomutoQuickSort(list) {
     /*!
     FROM : https://en.wikipedia.org/wiki/Quicksort
@@ -171,8 +171,8 @@ var SortMethods = (() => {
     return QuickSort(list, 0, list.length - 1);
   }
 
-  // src/services/sorting/naive-quicksort.ts
-  function NaiveQuickSort(list) {
+  // src/services/sorting/custom-quicksort.ts
+  function CustomQuickSort(list) {
     if (list.length <= 1) {
       return list;
     }
@@ -181,17 +181,27 @@ var SortMethods = (() => {
     const left = List();
     const right = List();
     BatchEnd();
+    let l = 1;
+    BatchStart();
     for (let i = 1; i < list.length; i++) {
       const item = list[i];
-      if (Compare(item, pivot) < 0) {
+      const c = Compare(item, pivot);
+      if (c == 0) {
+        Move(list, item, l++);
+      } else if (c < 0) {
         Move(left, item);
       } else {
         Move(right, item);
       }
     }
-    NaiveQuickSort(left);
-    NaiveQuickSort(right);
-    Move(list, pivot, left.length);
+    BatchEnd();
+    CustomQuickSort(left);
+    CustomQuickSort(right);
+    BatchStart();
+    for (let i = l - 1; i >= 0; i--) {
+      Move(list, list[i], left.length + i);
+    }
+    BatchEnd();
     BatchStart();
     for (let i = 0; i < left.length; i++) {
       Move(list, left[i], i);
@@ -199,7 +209,7 @@ var SortMethods = (() => {
     BatchEnd();
     BatchStart();
     for (let i = 0; i < right.length; i++) {
-      Move(list, right[i], i + left.length + 1);
+      Move(list, right[i], i + left.length + l);
     }
     BatchEnd();
     BatchStart();
@@ -209,12 +219,43 @@ var SortMethods = (() => {
     return list;
   }
 
+  // src/services/sorting/mergesort-topdown.ts
+  function MergeSortTopDown(list) {
+    function TopDownSplitMerge(B, iBegin, iEnd, A) {
+      if (iEnd - iBegin <= 1)
+        return;
+      let iMiddle = Math.floor((iEnd + iBegin) / 2);
+      TopDownSplitMerge(A, iBegin, iMiddle, B);
+      TopDownSplitMerge(A, iMiddle, iEnd, B);
+      TopDownMerge(B, iBegin, iMiddle, iEnd, A);
+    }
+    function TopDownMerge(A, iBegin, iMiddle, iEnd, B) {
+      let i = iBegin;
+      let j = iMiddle;
+      for (let k = iBegin; k < iEnd; k++) {
+        if (i < iMiddle && (j >= iEnd || Compare(A[i], A[j]) <= 0)) {
+          B[k] = A[i];
+          i = i + 1;
+        } else {
+          B[k] = A[j];
+          j = j + 1;
+        }
+      }
+    }
+    const temp = List();
+    for (let i = 0; i < list.length; i++) {
+      temp[i] = Copy(list[i]);
+    }
+    TopDownSplitMerge(temp, 0, temp.length, list);
+  }
+
   // src/services/sort-methods.ts
   var SortMethods = {
     BubbleSort: BubbleSort.toString(),
-    LomutoQuickSort: LomutoQuickSort.toString(),
-    HoareQuickSort: HoareQuickSort.toString(),
-    NaiveQuickSort: NaiveQuickSort.toString(),
+    "QuickSort Lomuto": LomutoQuickSort.toString(),
+    "QuickSort Hoare": HoareQuickSort.toString(),
+    "MergeSort TopDown": MergeSortTopDown.toString(),
+    Custom: CustomQuickSort.toString(),
     JavaScriptSort: JavaScriptSort.toString()
   };
   return __toCommonJS(sort_methods_exports);

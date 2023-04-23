@@ -25,6 +25,7 @@
 		"vite": "^4.2.1"
 	},
 	"dependencies": {
+		"monaco-editor": "^0.37.1",
 		"object-mutation-observer": "^2.0.2"
 	}
 }
