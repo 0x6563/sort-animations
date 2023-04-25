@@ -18,22 +18,29 @@
             fill: '',
         },
         cell: {
-            size: 20,
+            height: 20,
+            width: 20,
             fill: '#AAA',
-            highlight: 'red',
+            tint: '#b1177f',
+            shade: '#b1177f',
+            highlight: '#b1177f',
             radius: 4,
             margin: 4,
         },
         column: {
             fill: '',
-            highlight: '',
+            tint: '',
+            shade: 'red',
+            highlight: 'green',
         },
         graph: {
             radius: 4,
             margin: 12,
             padding: 12,
             fill: '#333',
-            highlight: 'red',
+            tint: 'red',
+            shade: 'red',
+            highlight: 'green',
         },
     };
     let error;
@@ -72,8 +79,6 @@
         }
         worker = undefined;
         sorting = false;
-
-
     }
     function Run() {
         (algorithms as any).Custom = edited;
@@ -121,9 +126,9 @@
         min-width: 50%;
     }
     .animation {
+        flex: 1 1 auto;
         margin: auto;
         aspect-ratio: 2;
-        flex: 1 1 auto;
     }
     .editor {
         height: 100%;

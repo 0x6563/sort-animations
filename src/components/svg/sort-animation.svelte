@@ -16,7 +16,7 @@
             if (e.startsWith('s-')) node.classList.remove(e);
         });
         if (node.classList.length == 0) {
-            node.removeAttribute('class');
+            // node.removeAttribute('class');
         }
     }
 
@@ -36,23 +36,23 @@
 </script>
 
 {#if animations}
-    {@const { graph, cell, column, svg: back } = animations.settings}
-    <svg bind:this={svg} viewBox={animations.current.viewbox} fill={back.fill}>
-        <defs>
+    {@const { graph, cell, column, background } = animations.settings}
+    <svg bind:this={svg} viewBox={animations.current.viewbox} fill={background.fill}>
+        <defs use:CleanClass>
             <rect id="array" height={graph.outerHeight} width={graph.outerWidth} rx={graph.radius} ry={graph.radius} fill={graph.fill} use:CleanClass />
-            <symbol id="column" width={cell.size} viewBox={`0 0 ${cell.size} ${column.height}`} preserveAspectRatio="xMinYMax slice" use:CleanClass>
-                <rect x="0" y="0" width={cell.size} height={column.height} fill={column.fill} use:CleanClass />
+            <symbol id="column" width={cell.width} viewBox={`0 0 ${cell.width} ${column.height}`} preserveAspectRatio="xMinYMax slice" use:CleanClass>
+                <rect x="0" y="0" width={cell.width} height={column.height} fill={column.fill} use:CleanClass />
                 {#each { length: animations.stats.value.maxValue } as a, i}
-                    <rect x="0" y={i * cell.outerSize} width={cell.size} height={cell.size} rx={cell.radius} ry={cell.radius} fill={cell.fill} use:CleanClass />
+                    <rect x="0" y={i * cell.outerHeight} width={cell.width} height={cell.height} rx={cell.radius} ry={cell.radius} use:CleanClass />
                 {/each}
             </symbol>
         </defs>
-        {#each animations.current.layout as ref}
+        {#each animations.current.references as ref}
             {#if ref.type == 'array'}
                 <use id={`ref-${ref.id}`} href="#array" x={-100} opacity={0} use:CleanClass />
             {/if}
         {/each}
-        {#each animations.current.layout as ref}
+        {#each animations.current.references as ref}
             {#if ref.type == 'value'}
                 <use id={`ref-${ref.id}`} href="#column" height={ref.dimensions.height} x={-100} y={-100} opacity={0} use:CleanClass />
             {/if}

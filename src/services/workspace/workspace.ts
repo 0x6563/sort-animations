@@ -25,6 +25,11 @@ export class Workspace {
 
     copy<T extends Value | List>(source: T): T {
         const itemId = this.references.id(source);
+        if (typeof itemId != 'number') {
+            const e = new Error();
+            const hint = e.stack?.split('\n')[3].replace(/.*(\d:\d)\)$/, '$1')
+            throw new Error(`Unable to Copy Value at ${hint}`);
+        }
         const { value } = this.references.item(itemId);
         let result;
         if (Array.isArray(value)) {
@@ -41,8 +46,15 @@ export class Workspace {
 
             // }
         } else {
-            result = this.constant(value);
+            // result = this.constant(value);
         }
+        this.log.push('call', {
+            call: 'copied',
+            data: {
+                source: this.references.id(source),
+                target: this.references.id(result)
+            }
+        });
         return result;
     }
 
@@ -51,6 +63,11 @@ export class Workspace {
     compare(a: Value, b: Value): number {
         const item1 = this.references.id(a);
         const item2 = this.references.id(b);
+        if (typeof item1 != 'number' || typeof item2 != 'number') {
+            const e = new Error();
+            const hint = e.stack?.split('\n')[3].replace(/.*(\d:\d)\)$/, '$1')
+            throw new Error(`Unable to Compare Values at ${hint}`);
+        }
         return a.value - b.value;
     }
 

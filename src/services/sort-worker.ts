@@ -6,12 +6,14 @@ onmessage = (e) => {
     postMessage({ array: e.data.array, log: workspace.log.events })
 };
 
-function SortEval(Workspace: Workspace, algorithm) {
-    let SortEval = undefined;
-    let postMessage = undefined;
-    let onmessage = undefined;
-    let { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, } = Workspace.scope();
-    eval(`(${algorithm})(Workspace.main)`);
+function SortEval(Workspace, algorithm) {
+    const SortEval = undefined;
+    const postMessage = undefined;
+    const onmessage = undefined;
+    const { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, } = Workspace.scope();
+    const list = Workspace.main;
+    Workspace = undefined;
+    eval(`(${algorithm})(list)`);
     // Prevent Tree Shaking
-    return { SortEval, postMessage, onmessage, Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, };
+    return { list, SortEval, postMessage, onmessage, Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, };
 } 
