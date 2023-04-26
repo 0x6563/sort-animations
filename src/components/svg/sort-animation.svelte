@@ -39,9 +39,20 @@
     {@const { graph, cell, column, background } = animations.settings}
     <svg bind:this={svg} viewBox={animations.current.viewbox} fill={background.fill}>
         <defs use:CleanClass>
-            <rect id="array" height={graph.outerHeight} width={graph.outerWidth} rx={graph.radius} ry={graph.radius} fill={graph.fill} use:CleanClass />
+            <symbol id="array" viewBox={`0 0 ${graph.outerWidth} ${graph.outerHeight}`} preserveAspectRatio="xMidYMid meet">
+                <!-- <rect x="0" y="0" width={graph.outerWidth} height={graph.outerHeight} rx={graph.radius} ry={graph.radius} stroke="none" use:CleanClass /> -->
+                {#if graph.corner}
+                    {@const cWidth = graph.outerWidth * graph.corner.width}
+                    {@const cHeight = graph.outerHeight * graph.corner.height}
+                    <path id="corner-tl" d={`M 0 ${cHeight} L 0 0 L ${cWidth} 0`} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
+                    <path id="corner-tr" d={`M ${graph.outerWidth - cWidth} 0 L ${graph.outerWidth} 0 L ${graph.outerWidth} ${cHeight}`} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
+                    <path id="corner-bl" d={`M 0 ${graph.outerHeight - cHeight} L 0 ${graph.outerHeight}  L ${cWidth} ${graph.outerHeight} `} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
+                    <path id="corner-br" d={`M ${graph.outerWidth - cWidth} ${graph.outerHeight} L ${graph.outerWidth} ${graph.outerHeight} L ${graph.outerWidth}  ${graph.outerHeight - cHeight}`} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
+                {:else}
+                    <rect x="0" y="0" width={graph.outerWidth} height={graph.outerHeight} rx={graph.radius} ry={graph.radius} stroke="none" use:CleanClass />
+                {/if}
+            </symbol>
             <symbol id="column" width={cell.width} viewBox={`0 0 ${cell.width} ${column.height}`} preserveAspectRatio="xMinYMax slice" use:CleanClass>
-                <rect x="0" y="0" width={cell.width} height={column.height} fill={column.fill} use:CleanClass />
                 {#each { length: animations.stats.value.maxValue } as a, i}
                     <rect x="0" y={i * cell.outerHeight} width={cell.width} height={cell.height} rx={cell.radius} ry={cell.radius} use:CleanClass />
                 {/each}
@@ -49,7 +60,7 @@
         </defs>
         {#each animations.current.references as ref}
             {#if ref.type == 'array'}
-                <use id={`ref-${ref.id}`} href="#array" x={-100} opacity={0} use:CleanClass />
+                <use id={`ref-${ref.id}`} href="#array" x={-100} opacity={0} height={graph.outerHeight} width={graph.outerWidth} use:CleanClass />
             {/if}
         {/each}
         {#each animations.current.references as ref}

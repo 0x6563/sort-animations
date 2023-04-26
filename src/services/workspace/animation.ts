@@ -110,6 +110,7 @@ export class WorkspaceAnimation {
         this.settings.column.height = this.columnHeight(this.stats.value.maxValue);
         this.settings.graph.margin = config.graph.margin;
         this.settings.graph.padding = config.graph.padding;
+        this.settings.graph.corner = config.graph.corner;
         this.settings.graph.height = this.settings.column.height;
         this.settings.graph.width = this.settings.cell.outerWidth * this.stats.array.length - this.settings.cell.margin;
         this.settings.graph.outerHeight = this.settings.graph.height + (this.settings.graph.padding * 2);
@@ -455,6 +456,8 @@ export class WorkspaceAnimation {
             if (ref.type === 'array') {
                 ref.dimensions.height = this.settings.graph.height;
                 ref.dimensions.width = this.settings.graph.width;
+                this.animateAttributes(ref.id, { fill: this.settings.graph.fill }, 0);
+
             }
             if (ref.type === 'value') {
                 ref.dimensions.height = this.columnHeight(ref.value);
@@ -625,6 +628,11 @@ export interface SVGConfigInput {
         tint: string;
         shade: string;
         highlight: string;
+        corner?: {
+            height: number;
+            width: number;
+            stroke: number;
+        }
     },
     cell: {
         fill: string;
