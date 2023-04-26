@@ -30,15 +30,19 @@ body,
         }
 
         &>.shrink {
-            height: 100%;
-            width: 100%;
             flex: 0 1 auto;
+            min-width: 0;
+            width: 100%;
+            min-height: 0;
+            height: 100%;
         }
 
         &>.grow {
             flex: 1 1 auto;
-            height: 100%;
+            min-width: 0;
             width: 100%;
+            min-height: 0;
+            height: 100%;
         }
 
         &.spread {
