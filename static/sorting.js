@@ -291,10 +291,7 @@ var SortMethods = (() => {
         }
       }
     }
-    const temp = List();
-    for (let i = 0; i < list.length; i++) {
-      temp[i] = Copy(list[i]);
-    }
+    const temp = Copy(list);
     SplitMerge(temp, 0, temp.length, list);
     Delete(temp);
   }

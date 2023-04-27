@@ -33,11 +33,10 @@ export class Workspace {
         const { value } = this.references.item(itemId);
         let result;
         if (Array.isArray(value)) {
-            const target = this.list();
+            result = this.list();
             for (let i = 0; i < value.length; i++) {
-                target[i] = this.copy(value[i]);
+                result[i] = this.copy(value[i]);
             }
-            result = target;
         } else if (value instanceof Value) {
             result = this.constant(value.value);
 

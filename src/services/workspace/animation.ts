@@ -187,19 +187,13 @@ export class WorkspaceAnimation {
                 if (detail.call == 'compare') {
                     this.unhighlight();
                     const { a, b } = detail.data;
-                    this.stage.highlight.cell = { [a]: 1, [b]: 1 };
-                    this.stage.changes.color.push(a, b);
-                    this.stage.references[a].highlight = true;
-                    this.stage.references[b].highlight = true;
+                    this.highlight(a);
+                    this.highlight(b);
                 }
                 if (detail.call == 'copied') {
                     this.unhighlight();
                     this.stage.changes.copy[detail.data.target] = detail.data.source;
-                    this.stage.references[detail.data.target].highlight = true;
-                    this.stage.highlight.cell = { [detail.data.target]: 1 };
-                    this.stage.changes.color.push(detail.data.target);
-
-
+                    this.highlight(detail.data.target);
                 }
             } else if (event == 'change') {
                 const { current, previous, target, property } = detail;
@@ -244,24 +238,38 @@ export class WorkspaceAnimation {
 
             if (callStack == 0 && (this.stage.changes.layout.length || this.stage.changes.color.length)) {
                 this.applyStage();
-                this.shiftStage();
             }
         }
         this.unhighlight();
         this.applyStage();
-        this.shiftStage();
     }
 
     applyStage() {
         this.adjustColors();
         this.adjustLayout();
+        this.shiftStage();
     }
+
+    highlight(id: number) {
+        if (this.stage.references[id].type == 'array') {
+            for (const i in this.stage.references[id].linked as {}) {
+                this.highlight(parseInt(i));
+            }
+        } else {
+            this.stage.references[id].highlight = true;
+            this.stage.highlight.cell[id] = 1;
+            this.stage.changes.color.push(id);
+        }
+    }
+
     unhighlight() {
         for (const id in this.stage.highlight.cell) {
             this.stage.references[id].highlight = false;
             this.stage.changes.color.push(parseInt(id));
         }
+        this.stage.highlight.cell = {};
     }
+
     adjustColors() {
         for (const id of this.stage.changes.color) {
             const staged = this.stage.references[id];
@@ -274,6 +282,7 @@ export class WorkspaceAnimation {
             }
         }
         this.incrementRuntime();
+
     }
 
     adjustLayout() {
@@ -390,7 +399,14 @@ export class WorkspaceAnimation {
                 if (id in this.stage.changes.copy) {
                     const target = this.stage.changes.copy[id];
                     const { x, y } = this.stage.references[target].dimensions;
+                    delete this.stage.changes.copy[id];
+                    this.stage.references[id].dimensions.x = x;
+                    this.stage.references[id].dimensions.y = y;
                     this.animateAttributes(id, { x, y }, 0);
+                    if (this.stage.references[id].linked as number >= 0) {
+                        const position = this.updateColumnPosition(this.stage.references[id] as LayoutValue);
+                        this.animateAttributes(id, position.changes, this.duration);
+                    }
                 } else {
                     const position = this.updateColumnPosition(this.stage.references[id] as LayoutValue);
                     this.animateAttributes(id, position.changes, 0);
@@ -479,7 +495,7 @@ export class WorkspaceAnimation {
 
     updateColumnPosition(v: LayoutValue): { changed: boolean, changes: { [key: string]: number | string } } {
         let position = { x: -1, y: -1 };
-        if (v.linked >= -0) {
+        if (v.linked >= 0) {
             const array = this.stage.references[v.linked] as LayoutArray;
             const index = array.linked[v.id];
             position = {
@@ -490,16 +506,17 @@ export class WorkspaceAnimation {
         }
         const changes: { [key: string]: number | string } = {};
 
-        const changed = v.dimensions.x != position.x || v.dimensions.y != position.y;
-
+        let changed = false;
         if (v.dimensions.x != position.x) {
             v.dimensions.x = position.x;
             changes.x = position.x;
+            changed = true;
         }
 
         if (v.dimensions.y != position.y) {
             v.dimensions.y = position.y;
             changes.y = position.y;
+            changed = true;
         }
         return { changes, changed };
     }
