@@ -20,27 +20,27 @@
         cell: {
             height: 20,
             width: 20,
-            fill: '#fd9170',
-            tint: '#fec8b7',
-            shade: '#fc5a29',
-            highlight: '#cf380a',
+            fill: '#adcfaf',
+            tint: '#5ba05f',
+            shade: '#2f5931',
+            highlight: '#861dbb',
             radius: 2,
             margin: 4,
         },
         column: {
             fill: '',
             tint: '',
-            shade: 'red',
-            highlight: 'green',
+            shade: '',
+            highlight: '',
         },
         graph: {
             radius: 4,
             margin: 12,
             padding: 22,
             fill: '#333',
-            tint: 'red',
-            shade: 'red',
-            highlight: 'green',
+            tint: '',
+            shade: '',
+            highlight: '',
             corner: {
                 width: 0.125,
                 height: 1,
@@ -127,7 +127,6 @@
     <button class="btn" on:click={() => (showEditor = !showEditor)}><Icon icon="edit" /></button>
     <button class="btn" on:click={svg.Save}><Icon icon="download" /></button>
     <button class="btn" on:click={Run}><Icon icon="slideshow" /></button>
-    <button class="btn" on:click={() => Sort()}><Icon icon="refresh" /></button>
 </div>
 
 <style lang="scss">
