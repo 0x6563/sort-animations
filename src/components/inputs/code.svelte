@@ -4,7 +4,6 @@
     import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
     import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
     import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
-
 </script>
 
 <script lang="ts">
@@ -19,7 +18,7 @@
     export let maxHeight = 0;
     export let minWidth = 600;
     export let maxWidth = 0;
-    export let theme = 'vs-dark';
+    export let theme = 'my-dark';
     export let width: 'fill' | 'auto' = 'fill';
     export let height: 'fill' | 'auto' = 'fill';
     export let settings: editor.IStandaloneEditorConstructionOptions = {};
@@ -39,7 +38,7 @@
             Monaco.editor.setTheme(theme);
         }
     }
-    Theme.subscribe((v) => (theme = v == 'light' ? 'vs-light' : 'vs-dark'));
+    Theme.subscribe((v) => (theme = v == 'light' ? 'vs-light' : 'my-dark'));
 
     onMount(async () => {
         Monaco = await import('monaco-editor');
@@ -51,7 +50,16 @@
             };
         } = {};
 
-        const CustomThemes: { [key: string]: editor.IStandaloneThemeData } = {};
+        const CustomThemes: { [key: string]: editor.IStandaloneThemeData } = {
+            'my-dark': {
+                base: 'vs-dark',
+                inherit: true,
+                colors: {
+                    'editor.background': '#111111',
+                },
+                rules: [],
+            },
+        };
 
         for (const id in CustomLanguages) {
             const { tokensProvider, completionItemProvider } = CustomLanguages[id];

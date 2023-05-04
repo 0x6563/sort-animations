@@ -77,32 +77,7 @@
     }
 </script>
 
-<div class="topbar flx row grow">
-    <div class="left flx grow">
-        <div class="animation grow">
-            {#if animations}
-                <SortAnimation bind:this={svg} {animations} />
-            {/if}
-            {#if error}
-                <div class="error">{error}</div>
-            {/if}
-        </div>
-    </div>
-    <div class="right grow" data-show={side}>
-        {#if side == 'editor'}
-            <Delay wait={250}>
-                <div class="flx grow column">
-                    <h1>Custom</h1>
-                    <Code bind:value={edited} language="javascript" {typings} />
-                </div>
-            </Delay>
-        {/if}
-        {#if side == 'settings'}
-            <Settings settings={config.settings} />
-        {/if}
-    </div>
-</div>
-<div class="botbar flx row spread">
+<div class="title flx row spread">
     <div class="setting">
         <Dropdown bind:value={algorithm} options={algorithms} on:select={() => (edited = algorithm)}>
             <div slot="label" let:label class="flx row spread">
@@ -117,6 +92,30 @@
     <button class="btn" on:click={Toggle('settings')}><Icon icon="settings" /></button>
     <button class="btn" on:click={svg.Save}><Icon icon="download" /></button>
     <button class="btn" on:click={Run}><Icon icon="slideshow" /></button>
+</div>
+<div class="content flx row grow">
+    <div class="left flx grow">
+        <div class="animation grow">
+            {#if animations}
+                <SortAnimation bind:this={svg} {animations} />
+            {/if}
+            {#if error}
+                <div class="error">{error}</div>
+            {/if}
+        </div>
+    </div>
+    <div class="right grow" data-show={side}>
+        {#if side == 'editor'}
+            <Delay wait={250}>
+                <div class="flx grow column">
+                    <Code bind:value={edited} language="javascript" {typings} />
+                </div>
+            </Delay>
+        {/if}
+        {#if side == 'settings'}
+            <Settings settings={config.settings} />
+        {/if}
+    </div>
 </div>
 <Modal />
 
@@ -145,17 +144,17 @@
     .right[data-show=''] {
         width: 0 !important;
     }
-    .topbar {
+    .content {
         width: 100%;
     }
-    .botbar {
+    .title {
         height: 50px;
         .setting {
             background: var(--fill);
             :global(.container) {
                 background: var(--fill);
                 position: absolute;
-                bottom: 0;
+                top: 0;
                 padding: 12px;
             }
         }
