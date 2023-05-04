@@ -1,13 +1,14 @@
 import type { AnimationFrame } from "@services/types";
 import type { EventLogEvent } from "./eventlog";
+import { WorkspaceLayout } from "./layout";
 
 export class WorkspaceAnimation {
     animations: AnimationFrame[] = [];
     runtime: number = 1000;
     pause: number = 200;
     duration: number = 500;
-    current: Stage = {
-        references: [],
+    current: UIState = {
+        elements: [],
         changes: {
             color: [],
             layout: [],
@@ -21,7 +22,7 @@ export class WorkspaceAnimation {
             graph: {}
         },
     };
-    stage: Stage;
+    staged: UIState;
 
     stats = {
         array: {
@@ -43,78 +44,14 @@ export class WorkspaceAnimation {
             moves: 0,
         }
     }
-    settings: SVGConfig = {
-        background: {
-            fill: ''
-        },
-        column: {
-            height: 0,
-            fill: '',
-            tint: '',
-            shade: '',
-            highlight: ''
-        },
-        graph: {
-            width: 0,
-            height: 0,
-            margin: 0,
-            padding: 0,
-            outerHeight: 0,
-            outerWidth: 0,
-            radius: 0,
-            fill: '',
-            tint: '',
-            shade: '',
-            highlight: ''
-        },
-        cell: {
-            height: 0,
-            width: 0,
-            margin: 0,
-            outerHeight: 0,
-            outerWidth: 0,
-            radius: 0,
-            fill: '',
-            tint: '',
-            shade: '',
-            highlight: ''
-        }
-    }
-
+    layout: WorkspaceLayout;
     constructor(
         private log: EventLogEvent[],
         config: SVGConfigInput
     ) {
-        this.stage = Clone(this.current);
-        this.settings.background.fill = config.background.fill || 'none';
-        this.settings.cell.fill = config.cell.fill || 'none';
-        this.settings.cell.tint = config.cell.tint || config.cell.fill;
-        this.settings.cell.shade = config.cell.shade || config.cell.fill;
-        this.settings.cell.highlight = config.cell.highlight || config.cell.fill;
-        this.settings.column.fill = config.column.fill || 'none';
-        this.settings.column.tint = config.column.tint || config.column.fill;
-        this.settings.column.shade = config.column.shade || config.column.fill;
-        this.settings.column.highlight = config.column.highlight || config.column.fill;
-        this.settings.graph.fill = config.graph.fill || 'none';
-        this.settings.graph.tint = config.graph.tint || config.graph.fill;
-        this.settings.graph.shade = config.graph.shade || config.graph.fill;
-        this.settings.graph.highlight = config.graph.highlight || config.graph.fill;
-        this.settings.cell.height = config.cell.height;
-        this.settings.cell.width = config.cell.width;
-        this.settings.cell.radius = config.cell.radius;
-        this.settings.graph.radius = config.graph.radius;
-        this.settings.cell.margin = config.cell.margin;
-        this.settings.cell.outerHeight = this.settings.cell.height + this.settings.cell.margin;
-        this.settings.cell.outerWidth = this.settings.cell.width + this.settings.cell.margin;
+        this.staged = Clone(this.current);
         this.analyze();
-        this.settings.column.height = this.columnHeight(this.stats.value.maxValue);
-        this.settings.graph.margin = config.graph.margin;
-        this.settings.graph.padding = config.graph.padding;
-        this.settings.graph.corner = config.graph.corner;
-        this.settings.graph.height = this.settings.column.height;
-        this.settings.graph.width = this.settings.cell.outerWidth * this.stats.array.length - this.settings.cell.margin;
-        this.settings.graph.outerHeight = this.settings.graph.height + (this.settings.graph.padding * 2);
-        this.settings.graph.outerWidth = this.settings.graph.width + (this.settings.graph.padding * 2);
+        this.layout = new WorkspaceLayout(config, { maxValue: this.stats.value.maxValue, length: this.stats.array.length })
         this.initialDimensions();
         this.shiftStage();
         this.animateEventLog();
@@ -132,7 +69,7 @@ export class WorkspaceAnimation {
                 if (detail.action == 'added') {
                     this.stats[detail.type].total++;
                     this.stats[detail.type].current++;
-                    this.stage.references[detail.id] = {
+                    this.staged.elements[detail.id] = {
                         id: detail.id,
                         type: detail.type,
                         dimensions: {
@@ -144,8 +81,8 @@ export class WorkspaceAnimation {
                         },
                         color: 'fill',
                         value: detail.value,
-                        linked: detail.type == 'array' ? {} : -1
-                    } as Layout;
+                        ...(detail.type == 'array' ? { children: {} } : { parent: -1 })
+                    } as ComponentUIState;
 
                     if (detail.type == 'value') {
                         this.stats.value.maxValue = Math.max(this.stats.value.maxValue, detail.value);
@@ -171,11 +108,11 @@ export class WorkspaceAnimation {
             const { event, detail } = this.log[i];
             if (event == 'reference') {
                 if (detail.action == 'added') {
-                    this.stage.references[detail.id].dimensions.opacity = 1;
+                    this.staged.elements[detail.id].dimensions.opacity = 1;
                 } else {
-                    this.stage.references[detail.id].dimensions.opacity = 0;
+                    this.staged.elements[detail.id].dimensions.opacity = 0;
                 }
-                this.stage.changes.layout.push(detail.id);
+                this.staged.changes.layout.push(detail.id);
 
             } else if (event == 'call') {
                 if (detail.progress == 'start') {
@@ -192,31 +129,34 @@ export class WorkspaceAnimation {
                 }
                 if (detail.call == 'copied') {
                     this.unhighlight();
-                    this.stage.changes.copy[detail.data.target] = detail.data.source;
+                    this.staged.changes.copy[detail.data.target] = detail.data.source;
                     this.highlight(detail.data.target);
                 }
             } else if (event == 'change') {
                 const { current, previous, target, property } = detail;
+                const targetElement = this.staged.elements[target] as GraphUIState;
 
                 if ('previous' in detail && typeof previous == 'number') {
-                    if (this.stage.references[target].linked[previous] == property) {
-                        delete this.stage.references[target].linked[previous];
-                        this.stage.references[previous].linked = -1;
-                        this.stage.references[previous].dimensions.opacity = 0;
-                        this.stage.changes.layout.push(previous);
+                    const previousElement = this.staged.elements[previous] as ValueUIState;
+                    if (targetElement.children[previous] == property) {
+                        delete targetElement.children[previous];
+                        previousElement.parent = -1;
+                        previousElement.dimensions.opacity = 0;
+                        this.staged.changes.layout.push(previous);
                     }
                 }
 
                 if ('current' in detail && typeof current == 'number') {
-                    const o = this.stage.references[current].linked as number;
+                    const currentElement = this.staged.elements[current] as ValueUIState;
+                    const o = currentElement.parent as number;
                     if (o >= 0) {
-                        delete this.stage.references[o].linked[current];
+                        delete (this.staged.elements[o] as GraphUIState).children[current];
                     }
-                    this.stage.references[current].linked = target;
-                    this.stage.references[current].dimensions.opacity = 1;
+                    currentElement.parent = target;
+                    currentElement.dimensions.opacity = 1;
 
-                    this.stage.references[target].linked[current] = property;
-                    this.stage.changes.layout.push(current);
+                    targetElement.children[current] = property;
+                    this.staged.changes.layout.push(current);
                 }
 
             } else if (event == 'animation') {
@@ -227,16 +167,19 @@ export class WorkspaceAnimation {
                     callStack--;
                 }
                 if (detail.command == 'unhighlight') {
-                    for (const id in this.stage.highlight.cell) {
-                        this.stage.references[id].highlight = false;
+                    for (const id in this.staged.highlight.cell) {
+                        this.staged.elements[id].highlight = false;
                     }
-                    for (const id in this.stage.highlight.graph) {
-                        this.stage.references[id].highlight = false;
+                    for (const id in this.staged.highlight.graph) {
+                        this.staged.elements[id].highlight = false;
                     }
+                }
+                if (detail.command == 'color') {
+                    this.colorElement(detail.target, detail.color);
                 }
             }
 
-            if (callStack == 0 && (this.stage.changes.layout.length || this.stage.changes.color.length)) {
+            if (callStack == 0 && (this.staged.changes.layout.length || this.staged.changes.color.length)) {
                 this.applyStage();
             }
         }
@@ -251,34 +194,50 @@ export class WorkspaceAnimation {
     }
 
     highlight(id: number) {
-        if (this.stage.references[id].type == 'array') {
-            for (const i in this.stage.references[id].linked as {}) {
+        if (this.staged.elements[id].type == 'array') {
+            for (const i in (this.staged.elements[id] as GraphUIState).children) {
                 this.highlight(parseInt(i));
             }
         } else {
-            this.stage.references[id].highlight = true;
-            this.stage.highlight.cell[id] = 1;
-            this.stage.changes.color.push(id);
+            this.staged.elements[id].highlight = true;
+            this.staged.highlight.cell[id] = 1;
+            this.staged.changes.color.push(id);
+        }
+    }
+
+    colorElement(id: number | undefined, color: 'tint' | 'shade' | 'fill') {
+        if (typeof id != 'number') {
+            for (let i = 0; i < this.staged.elements.length; i++) {
+                this.colorElement(i, color);
+            }
+        } else if (this.staged.elements[id].type == 'array') {
+            this.staged.elements[id].color = color;
+            for (const i in (this.staged.elements[id] as GraphUIState).children) {
+                this.colorElement(parseInt(i), color);
+            }
+        } else {
+            this.staged.elements[id].color = color;
+            this.staged.changes.color.push(id);
         }
     }
 
     unhighlight() {
-        for (const id in this.stage.highlight.cell) {
-            this.stage.references[id].highlight = false;
-            this.stage.changes.color.push(parseInt(id));
+        for (const id in this.staged.highlight.cell) {
+            this.staged.elements[id].highlight = false;
+            this.staged.changes.color.push(parseInt(id));
         }
-        this.stage.highlight.cell = {};
+        this.staged.highlight.cell = {};
     }
 
     adjustColors() {
-        for (const id of this.stage.changes.color) {
-            const staged = this.stage.references[id];
-            const current = this.current.references[id];
+        for (const id of this.staged.changes.color) {
+            const staged = this.staged.elements[id];
+            const current = this.current.elements[id];
             const t = staged.type == 'value' ? 'cell' : 'graph';
             const stagedColor = staged.highlight ? 'highlight' : staged.color;
             const currentColor = current.highlight ? 'highlight' : current.color;
             if (stagedColor != currentColor) {
-                this.animateAttributes(id, { fill: this.settings[t][stagedColor] }, this.duration);
+                this.animateAttributes(id, { fill: this.layout.settings[t][stagedColor] }, this.duration);
             }
         }
         this.incrementRuntime();
@@ -297,23 +256,23 @@ export class WorkspaceAnimation {
             other: []
         };
 
-        const layoutIds = Array.from(new Set(this.stage.changes.layout));
+        const layoutIds = Array.from(new Set(this.staged.changes.layout));
 
         for (const id of layoutIds) {
-            const stageRef = this.stage.references[id];
-            const currentRef = this.current.references[id];
+            const stageRef = this.staged.elements[id];
+            const currentRef = this.current.elements[id];
             const { dimensions: stageDims } = stageRef;
             const { dimensions: currentDims } = currentRef;
-            const stageParent = stageRef.type == 'value' && stageRef.linked >= 0 ? this.stage.references[stageRef.linked] : undefined;
-            const currentParent = currentRef.type == 'value' && currentRef.linked >= 0 ? this.current.references[currentRef.linked] : undefined;
-            const stageIndex = stageParent ? stageParent.linked[id] : undefined;
-            const currentIndex = currentParent ? currentParent.linked[id] : undefined;
+            const stageParent: GraphUIState | undefined = stageRef.type == 'value' && stageRef.parent >= 0 ? this.staged.elements[stageRef.parent] as GraphUIState : undefined;
+            const currentParent: GraphUIState | undefined = currentRef.type == 'value' && currentRef.parent >= 0 ? this.current.elements[currentRef.parent] as GraphUIState : undefined;
+            const stageIndex = stageParent ? stageParent.children[id] : undefined;
+            const currentIndex = currentParent ? currentParent.children[id] : undefined;
 
             if (stageRef.type == 'value' && !stageDims.opacity) {
                 changes.hideValues.push(id);
                 continue;
             }
-            if (stageRef.type == 'value' && (stageDims.opacity && currentDims.opacity) && (stageRef.linked != currentRef.linked || stageIndex != currentIndex)) {
+            if (stageRef.type == 'value' && (stageDims.opacity && currentDims.opacity) && (stageRef.parent != (currentRef as ValueUIState).parent || stageIndex != currentIndex)) {
                 changes.moveExistingValues.push(id);
                 continue;
             }
@@ -342,10 +301,10 @@ export class WorkspaceAnimation {
     }
 
     shiftStage() {
-        this.stage.changes.layout = [];
-        this.stage.changes.color = [];
-        this.current = Clone(this.stage);
-        this.stage = Clone(this.current);
+        this.staged.changes.layout = [];
+        this.staged.changes.color = [];
+        this.current = Clone(this.staged);
+        this.staged = Clone(this.current);
     }
 
     hideValues(ids: number[]) {
@@ -358,12 +317,12 @@ export class WorkspaceAnimation {
     }
 
     showArrays(ids: number[]) {
-        const visible = this.stats.array.ref.filter(({ id }) => this.stage.references[id].dimensions.opacity || this.current.references[id].dimensions.opacity);
+        const visible = this.stats.array.ref.filter(({ id }) => this.staged.elements[id].dimensions.opacity || this.current.elements[id].dimensions.opacity);
         this.setViewBox(visible.length);
 
         let changed = false;
         for (const id of ids) {
-            const position = this.updateGraphPosition(this.stage.references[id] as LayoutArray, visible.findIndex(v => v.id == id), visible.length);
+            const position = this.layout.updateGraphPosition(this.staged.elements[id] as GraphUIState, visible.findIndex(v => v.id == id), visible.length);
             if (position.changed) {
                 changed = true;
                 this.animateAttributes(id, position.changes, 0);
@@ -380,7 +339,9 @@ export class WorkspaceAnimation {
         if (ids.length) {
             let changed = false;
             for (const id of ids) {
-                const position = this.updateColumnPosition(this.stage.references[id] as LayoutValue);
+                const element = this.staged.elements[id] as ValueUIState;
+                const array = this.staged.elements[element.parent] as GraphUIState;
+                const position = this.layout.updateColumnPosition(array, element);
                 if (position.changed) {
                     changed = true;
                     this.animateAttributes(id, position.changes);
@@ -396,19 +357,22 @@ export class WorkspaceAnimation {
     showNewValues(ids: number[]) {
         if (ids.length) {
             for (const id of ids) {
-                if (id in this.stage.changes.copy) {
-                    const target = this.stage.changes.copy[id];
-                    const { x, y } = this.stage.references[target].dimensions;
-                    delete this.stage.changes.copy[id];
-                    this.stage.references[id].dimensions.x = x;
-                    this.stage.references[id].dimensions.y = y;
+                const element = this.staged.elements[id] as ValueUIState;
+                if (id in this.staged.changes.copy) {
+                    const target = this.staged.changes.copy[id];
+                    const { x, y } = this.staged.elements[target].dimensions;
+                    delete this.staged.changes.copy[id];
+                    element.dimensions.x = x;
+                    element.dimensions.y = y;
                     this.animateAttributes(id, { x, y }, 0);
-                    if (this.stage.references[id].linked as number >= 0) {
-                        const position = this.updateColumnPosition(this.stage.references[id] as LayoutValue);
+                    if (element.parent as number >= 0) {
+                        const array = this.staged.elements[element.parent] as GraphUIState;
+                        const position = this.layout.updateColumnPosition(array, element);
                         this.animateAttributes(id, position.changes, this.duration);
                     }
                 } else {
-                    const position = this.updateColumnPosition(this.stage.references[id] as LayoutValue);
+                    const array = this.staged.elements[element.parent] as GraphUIState;
+                    const position = this.layout.updateColumnPosition(array, element);
                     this.animateAttributes(id, position.changes, 0);
                 }
                 this.animateAttributes(id, { opacity: 1 });
@@ -418,13 +382,15 @@ export class WorkspaceAnimation {
     }
 
     hideArrays(ids: number[]) {
-        const visible = this.stats.array.ref.filter(({ id }) => this.stage.references[id].dimensions.opacity);
+        const visible = this.stats.array.ref.filter(({ id }) => this.staged.elements[id].dimensions.opacity);
 
         if (ids.length) {
             for (const id of ids) {
+                const element = this.staged.elements[id] as GraphUIState;
+
                 this.animateAttributes(id, { opacity: 0 });
-                for (const childId in this.stage.references[id].linked as { [key: number]: number }) {
-                    if (this.stage.references[childId].linked == id) {
+                for (const childId in element.children) {
+                    if ((this.staged.elements[childId] as ValueUIState).parent == id) {
                         this.animateAttributes(childId, { opacity: 0 });
                     }
                 }
@@ -436,14 +402,14 @@ export class WorkspaceAnimation {
     }
 
     redraw() {
-        const visible = this.stats.array.ref.filter(({ id }) => this.stage.references[id].dimensions.opacity)
+        const visible = this.stats.array.ref.filter(({ id }) => this.staged.elements[id].dimensions.opacity)
         for (const { id } of visible) {
-            const layout = this.stage.references[id] as LayoutArray;
-            const position = this.updateGraphPosition(layout, visible.findIndex(v => v.id == id), visible.length);
+            const layout = this.staged.elements[id] as GraphUIState;
+            const position = this.layout.updateGraphPosition(layout, visible.findIndex(v => v.id == id), visible.length);
             this.animateAttributes(id, position.changes);
 
-            for (const cid in layout.linked) {
-                const position = this.updateColumnPosition(this.stage.references[cid] as LayoutValue);
+            for (const cid in layout.children) {
+                const position = this.layout.updateColumnPosition(layout, this.staged.elements[cid] as ValueUIState);
                 this.animateAttributes(cid, position.changes);
             }
         }
@@ -468,102 +434,34 @@ export class WorkspaceAnimation {
     }
 
     initialDimensions() {
-        for (const ref of this.stage.references) {
+        for (const ref of this.staged.elements) {
             if (ref.type === 'array') {
-                ref.dimensions.height = this.settings.graph.height;
-                ref.dimensions.width = this.settings.graph.width;
-                this.animateAttributes(ref.id, { fill: this.settings.graph.fill }, 0);
+                ref.dimensions.height = this.layout.settings.graph.height;
+                ref.dimensions.width = this.layout.settings.graph.width;
+                this.animateAttributes(ref.id, { fill: this.layout.settings.graph.fill }, 0);
 
             }
             if (ref.type === 'value') {
-                ref.dimensions.height = this.columnHeight(ref.value);
-                ref.dimensions.width = this.settings.cell.width;
-                this.animateAttributes(ref.id, { fill: this.settings.cell.fill }, 0);
+                ref.dimensions.height = this.layout.columnHeight(ref.value);
+                ref.dimensions.width = this.layout.settings.cell.width;
+                this.animateAttributes(ref.id, { fill: this.layout.settings.cell.fill }, 0);
             }
 
         }
-        this.stage.viewbox = this.getViewBox(1);
-    }
-
-    columnHeight(v: number) {
-        let m = 0;
-        if (v > 1) {
-            m = this.settings.cell.margin * Math.ceil(v - 1);
-        }
-        return this.settings.cell.height * v + m;
-    }
-
-    updateColumnPosition(v: LayoutValue): { changed: boolean, changes: { [key: string]: number | string } } {
-        let position = { x: -1, y: -1 };
-        if (v.linked >= 0) {
-            const array = this.stage.references[v.linked] as LayoutArray;
-            const index = array.linked[v.id];
-            position = {
-                x: array.dimensions.x + index * this.settings.cell.outerWidth + this.settings.graph.padding,
-                y: array.dimensions.y + this.settings.column.height - v.dimensions.height + this.settings.graph.padding
-            }
-
-        }
-        const changes: { [key: string]: number | string } = {};
-
-        let changed = false;
-        if (v.dimensions.x != position.x) {
-            v.dimensions.x = position.x;
-            changes.x = position.x;
-            changed = true;
-        }
-
-        if (v.dimensions.y != position.y) {
-            v.dimensions.y = position.y;
-            changes.y = position.y;
-            changed = true;
-        }
-        return { changes, changed };
-    }
-
-    updateGraphPosition(v: LayoutArray, index: number, max: number): { changed: boolean, changes: { [key: string]: number | string } } {
-        const columns = Math.ceil(Math.sqrt(max));
-        const column = index % columns;
-        const row = Math.floor(index / columns);
-        const position = {
-            x: column * (this.settings.graph.outerWidth + this.settings.graph.margin) + this.settings.graph.margin,
-            y: row * (this.settings.graph.outerHeight + this.settings.graph.margin) + this.settings.graph.margin
-        }
-        const changes: { [key: string]: number | string } = {};
-
-        const changed = v.dimensions.x != position.x || v.dimensions.y != position.y;
-
-        if (v.dimensions.x != position.x) {
-            v.dimensions.x = position.x;
-            changes.x = position.x;
-        }
-
-        if (v.dimensions.y != position.y) {
-            v.dimensions.y = position.y;
-            changes.y = position.y;
-        }
-        return { changes, changed };
+        this.staged.viewbox = this.layout.getViewBox(1);
     }
 
     setViewBox(visibleArrays: number) {
-        const viewBox = this.getViewBox(visibleArrays);
-        if (viewBox != this.stage.viewbox) {
+        const viewBox = this.layout.getViewBox(visibleArrays);
+        if (viewBox != this.staged.viewbox) {
             this.animations.push({
                 begin: this.runtime,
                 duration: this.duration,
                 set: { viewBox }
             });
-            this.stage.viewbox = viewBox;
+            this.staged.viewbox = viewBox;
             this.incrementRuntime();
         }
-    }
-    getViewBox(visibleArrays: number) {
-        const columns = Math.ceil(Math.sqrt(visibleArrays));
-        const rows = Math.ceil(visibleArrays / columns);
-        const height = this.settings.graph.outerHeight * rows + this.settings.graph.margin * (rows + 1);
-        const width = this.settings.graph.outerWidth * columns + this.settings.graph.margin * (columns + 1);
-
-        return `0 0 ${width} ${height}`;
     }
 }
 
@@ -572,8 +470,8 @@ function Clone<T>(o: T): T {
 }
 
 
-interface Stage {
-    references: Layout[];
+export interface UIState {
+    elements: ComponentUIState[];
     changes: {
         color: number[];
         layout: number[];
@@ -587,50 +485,33 @@ interface Stage {
     };
     viewbox: string;
 }
-type index = number;
-type Layout = LayoutArray | LayoutValue;
-interface LayoutArray {
+export type ComponentUIState = GraphUIState | ValueUIState;
+export interface GraphUIState {
     id: number;
     type: 'array';
     dimensions: Dimensions;
-    linked: { [id: number]: index }
+    children: { [id: number]: number }
     highlight: boolean;
     color: 'tint' | 'shade' | 'fill';
 }
 
-interface LayoutValue {
+export interface ValueUIState {
     id: number;
     type: 'value';
     value: number
     dimensions: Dimensions;
-    linked: number;
+    parent: number;
     highlight: boolean;
     color: 'tint' | 'shade' | 'fill';
 }
 
 
-interface Dimensions {
+export interface Dimensions {
     x: number;
     y: number;
     height: number;
     width: number;
     opacity: number;
-}
-type SVGConfig = SVGConfigInput & SVGConfigInputComputed;
-interface SVGConfigInputComputed {
-    graph: {
-        width: number;
-        height: number;
-        outerHeight: number;
-        outerWidth: number;
-    }
-    cell: {
-        outerHeight: number;
-        outerWidth: number;
-    }
-    column: {
-        height: number;
-    }
 }
 
 export interface SVGConfigInput {

@@ -1,4 +1,4 @@
-export class Value {
+export class Constant {
     #v: any;
     get value() {
         return this.#v;

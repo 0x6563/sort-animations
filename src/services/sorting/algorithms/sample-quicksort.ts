@@ -1,7 +1,8 @@
-import type { Value, Workspace } from "@services/workspace/workspace"
-declare const { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: ReturnType<Workspace['scope']>;
+import type { Value, Scope } from "@services/workspace/types";
+declare const { Constant, List, Copy, Compare, Move, Swap, Untrack, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: Scope;
+declare const list: Value[];
 
-export function CustomQuickSort(list: Value[]) {
+function QuickSort(list: Value[]) {
     if (list.length <= 1) {
         return list;
     }
@@ -26,8 +27,8 @@ export function CustomQuickSort(list: Value[]) {
     }
     BatchEnd();
 
-    CustomQuickSort(left);
-    CustomQuickSort(right);
+    QuickSort(left);
+    QuickSort(right);
 
     BatchStart();
     for (let i = l - 1; i >= 0; i--) {
@@ -46,8 +47,10 @@ export function CustomQuickSort(list: Value[]) {
     }
     BatchEnd();
     BatchStart();
-    Delete(left);
-    Delete(right);
+    Untrack(left);
+    Untrack(right);
     BatchEnd();
     return list;
 }
+
+QuickSort(list);

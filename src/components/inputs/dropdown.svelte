@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import Flyout from './flyout.svelte';
+    import Flyout from '../flyout.svelte';
     export let options: ({ key: string; value: any } | string)[] | { [key: string]: any } = [];
     export let value: any = undefined;
     export let expanded = false;

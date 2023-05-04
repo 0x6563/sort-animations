@@ -4,6 +4,7 @@
     import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
     import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
     import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+
 </script>
 
 <script lang="ts">
@@ -22,6 +23,7 @@
     export let width: 'fill' | 'auto' = 'fill';
     export let height: 'fill' | 'auto' = 'fill';
     export let settings: editor.IStandaloneEditorConstructionOptions = {};
+    export let typings: { [key: string]: string } = {};
 
     let container: HTMLDivElement;
     const dispatch = createEventDispatcher();
@@ -64,6 +66,9 @@
 
         for (const id in CustomThemes) {
             Monaco.editor.defineTheme(id, CustomThemes[id]);
+        }
+        for (const key in typings) {
+            Monaco.languages.typescript.javascriptDefaults.addExtraLib(typings[key], key);
         }
 
         window.MonacoEnvironment = {

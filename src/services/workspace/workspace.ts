@@ -1,7 +1,7 @@
-import { Value } from "./value";
-import { References } from "./references";
+import { Constant } from "./constant";
+import { GetType, References } from "./references";
 import { EventLog } from "./eventlog";
-export { Value } from './value';
+import type { List, Scope, Value } from "./types";
 export class Workspace {
     log: EventLog;
     references: References<List | Value> = new References();
@@ -15,12 +15,19 @@ export class Workspace {
 
     // Create
 
-    constant(value: number): Value {
-        return this.references.new(new Value(value));
+    constant(value: number): Constant {
+        return this.references.new(new Constant(value));
     }
 
     list(): List {
         return this.references.new<List>([]);
+    }
+
+    track(value: any) {
+        if (GetType(value) == 'primitive') {
+            return this.constant(value);
+        }
+        return this.references.new(value);
     }
 
     copy<T extends Value | List>(source: T): T {
@@ -37,7 +44,7 @@ export class Workspace {
             for (let i = 0; i < value.length; i++) {
                 result[i] = this.copy(value[i]);
             }
-        } else if (value instanceof Value) {
+        } else if (value instanceof Constant) {
             result = this.constant(value.value);
 
         } else if (value && typeof value == 'object') {
@@ -87,7 +94,7 @@ export class Workspace {
 
     // Delete
 
-    delete(source: Value | List) {
+    untrack(source: Value | List) {
         const itemId = this.references.id(source);
         this.detach(source);
         this.references.delete(this.references.item(itemId));
@@ -134,7 +141,7 @@ export class Workspace {
     }
 
 
-    scope() {
+    scope(): Scope {
         return {
             // Create
             Constant: this.wrap('constant'),
@@ -155,9 +162,12 @@ export class Workspace {
             Move: this.wrap('move'),
             Swap: this.wrap('swap'),
             // Delete
-            Delete: this.wrap('delete'),
+            Untrack: this.wrap('untrack'),
 
-            //Other
+            //Presentation
+            Shade: this.color('shade'),
+            Tint: this.color('tint'),
+            Fill: this.color('fill'),
             Unhighlight: () => this.log.push('animation', { command: 'unhighlight' }),
             BatchStart: () => this.log.push('animation', { command: 'batch-start' }),
             BatchEnd: () => this.log.push('animation', { command: 'batch-end' }),
@@ -165,6 +175,12 @@ export class Workspace {
             Custom: (message: string) => this.log.push('custom', { message }),
 
         }
+    }
+
+    private color(color: 'shade' | 'tint' | 'fill') {
+        return (source?: List | Value) => {
+            this.log.push('animation', { command: 'color', target: source ? this.references.id(source) : undefined, color })
+        };
     }
 
     private wrap<T extends KeysMatching<Workspace, Function>>(call: T): Workspace[T] {
@@ -179,6 +195,3 @@ export class Workspace {
 }
 
 type KeysMatching<T, V> = { [K in keyof T]: T[K] extends V ? K : never }[keyof T];
-
-type List = Value[]; // Add dictionary
-

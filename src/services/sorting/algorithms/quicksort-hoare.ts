@@ -1,8 +1,41 @@
-import type { Value, Workspace } from "@services/workspace/workspace"
-declare const { Constant, List, Copy, Compare, Move, Swap, Delete, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: ReturnType<Workspace['scope']>;
+import type { Value, Scope } from "@services/workspace/types";
+declare const { Constant, List, Copy, Compare, Move, Swap, Untrack, Unhighlight, BatchStart, BatchEnd, Animate, Custom, }: Scope;
+declare const list: Value[];
 
-export function HoareQuickSort(list: Value[]) {
-    /*!
+function QuickSort(A: Value[], low: number, high: number) {
+    if (low >= 0 && low < high) {
+        const p = Partition(A, low, high) as number;
+        QuickSort(A, low, p);
+        QuickSort(A, p + 1, high);
+    }
+
+}
+
+function Partition(A: Value[], low: number, high: number) {
+    const pivot = A[Math.floor((high - low) / 2) + low];
+    let i = low - 1;
+    let j = high + 1;
+
+    // I hate this.
+    while (1) {
+        do {
+            i++;
+        } while (Compare(A[i], pivot) < 0);
+
+        do {
+            j--;
+        } while (Compare(A[j], pivot) > 0);
+
+        if (i >= j) {
+            return j;
+        }
+        Swap(A, A[i], A[j]);
+    }
+
+}
+QuickSort(list, 0, list.length - 1);
+
+/*!
      FROM : https://en.wikipedia.org/wiki/Quicksort
        // Sorts a (portion of an) array, divides it into partitions, then sorts those
      algorithm quicksort(A, lo, hi) is 
@@ -37,37 +70,3 @@ export function HoareQuickSort(list: Value[]) {
        // Swap the elements at the left and right indices
        swap A[i] with A[j]
     */
-    function QuickSort(A: Value[], low: number, high: number) {
-        if (low >= 0 && low < high) {
-            const p = Partition(A, low, high) as number;
-            QuickSort(A, low, p);
-            QuickSort(A, p + 1, high);
-        }
-
-    }
-
-    function Partition(A: Value[], low: number, high: number) {
-        const pivot = A[Math.floor((high - low) / 2) + low];
-        let i = low - 1;
-        let j = high + 1;
-
-        // I hate this.
-        while (1) {
-            do {
-                i++;
-            } while (Compare(A[i], pivot) < 0);
-
-            do {
-                j--;
-            } while (Compare(A[j], pivot) > 0);
-
-            if (i >= j) {
-                return j;
-            }
-            Swap(A, A[i], A[j]);
-        }
-
-    }
-    return QuickSort(list, 0, list.length - 1);
-
-}

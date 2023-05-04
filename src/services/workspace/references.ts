@@ -1,6 +1,6 @@
 import { ObjectMutationObserver } from "object-mutation-observer";
 import type { ChangeEvent } from "object-mutation-observer/dist/types";
-import { Value } from "./value";
+import { Constant } from "./constant";
 export class References<T> {
     private nextId = 0;
     private xmap: WeakMap<T & object | Item<T>, number> = new Map();
@@ -58,8 +58,8 @@ export class References<T> {
     }
 }
 
-function GetType(o: any) {
-    if (o instanceof Value) {
+export function GetType(o: any) {
+    if (o instanceof Constant) {
         return 'value'
     } else if (Array.isArray(o)) {
         return 'array';

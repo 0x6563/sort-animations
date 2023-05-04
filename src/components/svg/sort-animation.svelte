@@ -1,22 +1,17 @@
 <script lang="ts">
-    import { WorkspaceAnimation, type SVGConfigInput } from '@services/workspace/animation';
+    import type { WorkspaceAnimation } from '@services/workspace/animation';
     import Animate from './animate.svelte';
-    import type { EventLogEvent } from '@services/workspace/eventlog';
 
-    export let log: EventLogEvent[];
-    export let settings: SVGConfigInput;
+    export let animations: WorkspaceAnimation;
+
     let svg: SVGElement;
-    let animations: WorkspaceAnimation;
-    $: {
-        animations = new WorkspaceAnimation(log, settings);
-    }
 
     function CleanClass(node: SVGElement) {
         node.classList.forEach((e) => {
             if (e.startsWith('s-')) node.classList.remove(e);
         });
         if (node.classList.length == 0) {
-            // node.removeAttribute('class');
+            node.removeAttribute('class');
         }
     }
 
@@ -36,11 +31,10 @@
 </script>
 
 {#if animations}
-    {@const { graph, cell, column, background } = animations.settings}
+    {@const { graph, cell, column, background } = animations.layout.settings}
     <svg bind:this={svg} viewBox={animations.current.viewbox} fill={background.fill}>
         <defs use:CleanClass>
             <symbol id="array" viewBox={`0 0 ${graph.outerWidth} ${graph.outerHeight}`} preserveAspectRatio="xMidYMid meet">
-                <!-- <rect x="0" y="0" width={graph.outerWidth} height={graph.outerHeight} rx={graph.radius} ry={graph.radius} stroke="none" use:CleanClass /> -->
                 {#if graph.corner}
                     {@const cWidth = graph.outerWidth * graph.corner.width}
                     {@const cHeight = graph.outerHeight * graph.corner.height}
@@ -58,19 +52,18 @@
                 {/each}
             </symbol>
         </defs>
-        {#each animations.current.references as ref}
+        <rect width="100%" height="100%" fill={background.fill} />
+        {#each animations.current.elements as ref}
             {#if ref.type == 'array'}
                 <use id={`ref-${ref.id}`} href="#array" x={-100} opacity={0} height={graph.outerHeight} width={graph.outerWidth} use:CleanClass />
             {/if}
         {/each}
-        {#each animations.current.references as ref}
+        {#each animations.current.elements as ref}
             {#if ref.type == 'value'}
                 <use id={`ref-${ref.id}`} href="#column" height={ref.dimensions.height} x={-100} y={-100} opacity={0} use:CleanClass />
             {/if}
         {/each}
         <Animate animations={animations.animations} />
-
-        <!-- <use href="#column" id={`value${id}`} {height} x={square * -1} y={(height + graphPadding) * -1} fill="white" use:noClass /> -->
     </svg>
 {/if}
 
