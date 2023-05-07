@@ -31,7 +31,7 @@ export const SVGLayout: SVGConfigInput = {
     },
     border: {
         width: 0.125,
-        height: 1,
+        height: .5,
         thickness: 10,
         fill: '#333333',
         tint: '',

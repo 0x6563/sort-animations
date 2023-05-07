@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { WorkspaceAnimation } from '@services/workspace/animation';
     import Animate from './animate.svelte';
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 
     export let animations: WorkspaceAnimation;
     const dispatch = createEventDispatcher();
@@ -15,13 +15,28 @@
             node.removeAttribute('class');
         }
     }
-    let done;
-    $: {
-        const end = animations.animations.reduce((a, v) => (v.begin + v.duration > a ? v.begin + v.duration : a), 0);
-        clearTimeout(done);
-        done = setTimeout(() => dispatch('done'), end + 3000);
-    }
 
+    $: max = animations.animations.reduce((a, v) => (v.begin + v.duration > a ? v.begin + v.duration : a), 0);
+    let interval;
+    let lock = false;
+    onMount(() => {
+        interval = setInterval(() => {
+            if (svg) {
+                const time = (svg as any).getCurrentTime();
+                if (time * 1000 >= max + 2000) {
+                    if (lock) {
+                        lock = false;
+                        dispatch('done');
+                    }
+                } else {
+                    lock = true;
+                }
+            }
+        }, 1000);
+    });
+    onDestroy(() => {
+        clearInterval(interval);
+    });
     export function Save() {
         svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
         const svgData = svg.outerHTML;

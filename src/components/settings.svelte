@@ -9,16 +9,20 @@
     function Refresh() {
         dispatch('refresh');
     }
+    let height = settings.svg.border.height * 200;
+    let width = settings.svg.border.width * 200;
+    $: settings.svg.border.height = height / 200;
+    $: settings.svg.border.width = width / 200;
 </script>
 
 <div class="settings">
     <div class="section">
         <h4>SVG</h4>
-        <Color label="Fill" bind:value={settings.svg.background.fill} />
+        <Color label="Background" bind:value={settings.svg.background.fill} />
     </div>
     <div class="section">
         <h4>Graph</h4>
-        <Color label="Fill" bind:value={settings.svg.graph.fill} />
+        <Color label="Background" bind:value={settings.svg.graph.fill} />
         <Color label="Tint" bind:value={settings.svg.graph.tint} />
         <Color label="Shade" bind:value={settings.svg.graph.shade} />
         <Color label="Highlight" bind:value={settings.svg.graph.highlight} />
@@ -30,19 +34,19 @@
     </div>
     <div class="section">
         <h4>Border</h4>
-        <Color label="Fill" bind:value={settings.svg.border.fill} />
+        <Color label="Color" bind:value={settings.svg.border.fill} />
         <Color label="Tint" bind:value={settings.svg.border.tint} />
         <Color label="Shade" bind:value={settings.svg.border.shade} />
         <Color label="Highlight" bind:value={settings.svg.border.highlight} />
         <br />
 
-        <Number label="Height" bind:value={settings.svg.border.height} />
-        <Number label="Width" bind:value={settings.svg.border.width} />
+        <Number label="Height %" bind:value={height} min={0} max={100} />
+        <Number label="Width %" bind:value={width} min={0} max={100} />
         <Number label="Thickness" bind:value={settings.svg.border.thickness} />
     </div>
     <div class="section">
         <h4>Cell</h4>
-        <Color label="Fill" bind:value={settings.svg.cell.fill} />
+        <Color label="Background" bind:value={settings.svg.cell.fill} />
         <Color label="Tint" bind:value={settings.svg.cell.tint} />
         <Color label="Shade" bind:value={settings.svg.cell.shade} />
         <Color label="Highlight" bind:value={settings.svg.cell.highlight} />
@@ -53,8 +57,7 @@
         <Number label="Width" bind:value={settings.svg.cell.width} />
     </div>
     <div class="section">
-        <h4>Refresh</h4>
-        <button on:click={Refresh}> <Icon icon="refresh" /></button>
+        <button on:click={Refresh}> <Icon icon="brush" /></button>
     </div>
 </div>
 
@@ -62,6 +65,8 @@
     .settings {
         padding: 24px;
         text-align: center;
+        width: 100%;
+        overflow: auto;
     }
     button {
         background: none;
