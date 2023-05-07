@@ -23,7 +23,7 @@
     let error;
     let side: '' | 'editor' | 'settings' = '';
     let maxNumbers = 20;
-    let algorithm = algorithms.BubbleSort;
+    let algorithm = algorithms['Sample QuickSort'];
     let edited = algorithm;
     let worker: undefined | WorkerPromiseResult;
     let starting = false;
@@ -77,6 +77,9 @@
     }
 </script>
 
+<svelte:head>
+    <title>Sort Animations by 0x6563</title>
+</svelte:head>
 <div class="title flx row spread">
     <div class="signature">
         <h2>Sort Animations</h2>
