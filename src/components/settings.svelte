@@ -29,6 +29,18 @@
         <Number label="Padding" bind:value={settings.svg.graph.padding} />
     </div>
     <div class="section">
+        <h4>Border</h4>
+        <Color label="Fill" bind:value={settings.svg.border.fill} />
+        <Color label="Tint" bind:value={settings.svg.border.tint} />
+        <Color label="Shade" bind:value={settings.svg.border.shade} />
+        <Color label="Highlight" bind:value={settings.svg.border.highlight} />
+        <br />
+
+        <Number label="Height" bind:value={settings.svg.border.height} />
+        <Number label="Width" bind:value={settings.svg.border.width} />
+        <Number label="Thickness" bind:value={settings.svg.border.thickness} />
+    </div>
+    <div class="section">
         <h4>Cell</h4>
         <Color label="Fill" bind:value={settings.svg.cell.fill} />
         <Color label="Tint" bind:value={settings.svg.cell.tint} />

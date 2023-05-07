@@ -24,7 +24,7 @@ export class WorkspaceLayout {
             fill: '',
             tint: '',
             shade: '',
-            highlight: ''
+            highlight: '',
         },
         cell: {
             height: 0,
@@ -37,6 +37,15 @@ export class WorkspaceLayout {
             tint: '',
             shade: '',
             highlight: ''
+        },
+        border: {
+            thickness: 0,
+            fill: '',
+            tint: '',
+            shade: '',
+            highlight: '',
+            height: 0,
+            width: 0
         }
     }
 
@@ -49,15 +58,15 @@ export class WorkspaceLayout {
     ) {
 
         this.settings.background.fill = config.background.fill || 'none';
-        this.settings.cell.fill = config.cell.fill || 'none';
+        this.settings.cell.fill = config.cell.fill || this.settings.background.fill;
         this.settings.cell.tint = config.cell.tint || config.cell.fill;
         this.settings.cell.shade = config.cell.shade || config.cell.fill;
         this.settings.cell.highlight = config.cell.highlight || config.cell.fill;
-        this.settings.column.fill = config.column.fill || 'none';
+        this.settings.column.fill = config.column.fill || this.settings.background.fill;
         this.settings.column.tint = config.column.tint || config.column.fill;
         this.settings.column.shade = config.column.shade || config.column.fill;
         this.settings.column.highlight = config.column.highlight || config.column.fill;
-        this.settings.graph.fill = config.graph.fill || 'none';
+        this.settings.graph.fill = config.graph.fill || this.settings.background.fill;
         this.settings.graph.tint = config.graph.tint || config.graph.fill;
         this.settings.graph.shade = config.graph.shade || config.graph.fill;
         this.settings.graph.highlight = config.graph.highlight || config.graph.fill;
@@ -71,12 +80,21 @@ export class WorkspaceLayout {
         this.settings.column.height = this.columnHeight(stats.maxValue);
         this.settings.graph.margin = config.graph.margin;
         this.settings.graph.padding = config.graph.padding;
-        this.settings.graph.corner = config.graph.corner;
+
+        this.settings.border.height = config.border.height;
+        this.settings.border.width = config.border.width;
+        this.settings.border.thickness = config.border.thickness;
+        this.settings.border.fill = config.border.fill || this.settings.graph.fill;
+        this.settings.border.tint = config.border.tint || config.border.fill;
+        this.settings.border.shade = config.border.shade || config.border.fill;
+        this.settings.border.highlight = config.border.highlight || config.border.fill;
+
         this.settings.graph.height = this.settings.column.height;
         this.settings.graph.width = this.settings.cell.outerWidth * stats.length - this.settings.cell.margin;
         this.settings.graph.outerHeight = this.settings.graph.height + (this.settings.graph.padding * 2);
         this.settings.graph.outerWidth = this.settings.graph.width + (this.settings.graph.padding * 2);
     }
+
 
     columnHeight(v: number) {
         let m = 0;

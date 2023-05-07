@@ -217,14 +217,12 @@ export class WorkspaceAnimation {
     }
 
     colorElement(id: number, color: 'tint' | 'shade' | 'fill') {
+        this.staged.elements[id].color = color;
+        this.staged.changes.color.push(id);
         if (this.staged.elements[id].type == 'array') {
-            this.staged.elements[id].color = color;
             for (const i in (this.staged.elements[id] as GraphUIState).children) {
                 this.colorElement(parseInt(i), color);
             }
-        } else {
-            this.staged.elements[id].color = color;
-            this.staged.changes.color.push(id);
         }
     }
 
@@ -245,11 +243,14 @@ export class WorkspaceAnimation {
         for (const id of this.staged.changes.color) {
             const staged = this.staged.elements[id];
             const current = this.current.elements[id];
-            const t = staged.type == 'value' ? 'cell' : 'graph';
             const stagedColor = staged.highlight ? 'highlight' : staged.color;
             const currentColor = current.highlight ? 'highlight' : current.color;
             if (stagedColor != currentColor) {
-                this.animateAttributes(id, { fill: this.layout.settings[t][stagedColor] }, this.duration);
+                if (staged.type === 'value') {
+                    this.animateAttributes(id, { fill: this.layout.settings.cell[stagedColor] }, this.duration);
+                } else {
+                    this.animateAttributes(id, { fill: this.layout.settings.graph[stagedColor], stroke: this.layout.settings.border[stagedColor] }, this.duration);
+                }
             }
         }
         this.incrementRuntime();
@@ -450,7 +451,7 @@ export class WorkspaceAnimation {
             if (ref.type === 'array') {
                 ref.dimensions.height = this.layout.settings.graph.height;
                 ref.dimensions.width = this.layout.settings.graph.width;
-                this.animateAttributes(ref.id, { fill: this.layout.settings.graph.fill }, 0);
+                this.animateAttributes(ref.id, { fill: this.layout.settings.graph.fill, stroke: this.layout.settings.border.fill }, 0);
 
             }
             if (ref.type === 'value') {
@@ -538,12 +539,16 @@ export interface SVGConfigInput {
         tint: string;
         shade: string;
         highlight: string;
-        corner?: {
-            height: number;
-            width: number;
-            stroke: number;
-        }
     },
+    border: {
+        height: number;
+        width: number;
+        thickness: number;
+        fill: string;
+        tint: string;
+        shade: string;
+        highlight: string;
+    }
     cell: {
         fill: string;
         tint: string;

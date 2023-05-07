@@ -1,9 +1,10 @@
 <script lang="ts">
     import type { WorkspaceAnimation } from '@services/workspace/animation';
     import Animate from './animate.svelte';
+    import { createEventDispatcher } from 'svelte';
 
     export let animations: WorkspaceAnimation;
-
+    const dispatch = createEventDispatcher();
     let svg: SVGElement;
 
     function CleanClass(node: SVGElement) {
@@ -13,6 +14,12 @@
         if (node.classList.length == 0) {
             node.removeAttribute('class');
         }
+    }
+    let done;
+    $: {
+        const end = animations.animations.reduce((a, v) => (v.begin + v.duration > a ? v.begin + v.duration : a), 0);
+        clearTimeout(done);
+        done = setTimeout(() => dispatch('done'), end + 3000);
     }
 
     export function Save() {
@@ -31,20 +38,17 @@
 </script>
 
 {#if animations}
-    {@const { graph, cell, column, background } = animations.layout.settings}
+    {@const { graph, cell, column, background, border } = animations.layout.settings}
+    {@const cWidth = graph.outerWidth * border.width}
+    {@const cHeight = graph.outerHeight * border.height}
     <svg bind:this={svg} viewBox={animations.current.viewbox} fill={background.fill}>
         <defs use:CleanClass>
             <symbol id="array" viewBox={`0 0 ${graph.outerWidth} ${graph.outerHeight}`} preserveAspectRatio="xMidYMid meet">
-                {#if graph.corner}
-                    {@const cWidth = graph.outerWidth * graph.corner.width}
-                    {@const cHeight = graph.outerHeight * graph.corner.height}
-                    <path id="corner-tl" d={`M 0 ${cHeight} L 0 0 L ${cWidth} 0`} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
-                    <path id="corner-tr" d={`M ${graph.outerWidth - cWidth} 0 L ${graph.outerWidth} 0 L ${graph.outerWidth} ${cHeight}`} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
-                    <path id="corner-bl" d={`M 0 ${graph.outerHeight - cHeight} L 0 ${graph.outerHeight}  L ${cWidth} ${graph.outerHeight} `} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
-                    <path id="corner-br" d={`M ${graph.outerWidth - cWidth} ${graph.outerHeight} L ${graph.outerWidth} ${graph.outerHeight} L ${graph.outerWidth}  ${graph.outerHeight - cHeight}`} fill="none" stroke={graph.fill} stroke-width={graph.corner.stroke} />
-                {:else}
-                    <rect x="0" y="0" width={graph.outerWidth} height={graph.outerHeight} rx={graph.radius} ry={graph.radius} stroke="none" use:CleanClass />
-                {/if}
+                <rect x="0" y="0" stroke="none" stroke-width="0" width={graph.outerWidth} height={graph.outerHeight} rx={graph.radius} ry={graph.radius} use:CleanClass />
+                <path id="corner-tl" fill="none" fill-opacity="0" stroke-width={border.thickness * 2} d={`M 0 ${cHeight} L 0 0 L ${cWidth} 0`} />
+                <path id="corner-tr" fill="none" fill-opacity="0" stroke-width={border.thickness * 2} d={`M ${graph.outerWidth - cWidth} 0 L ${graph.outerWidth} 0 L ${graph.outerWidth} ${cHeight}`} />
+                <path id="corner-bl" fill="none" fill-opacity="0" stroke-width={border.thickness * 2} d={`M 0 ${graph.outerHeight - cHeight} L 0 ${graph.outerHeight}  L ${cWidth} ${graph.outerHeight} `} />
+                <path id="corner-br" fill="none" fill-opacity="0" stroke-width={border.thickness * 2} d={`M ${graph.outerWidth - cWidth} ${graph.outerHeight} L ${graph.outerWidth} ${graph.outerHeight} L ${graph.outerWidth}  ${graph.outerHeight - cHeight}`} />
             </symbol>
             <symbol id="column" width={cell.width} viewBox={`0 0 ${cell.width} ${column.height}`} preserveAspectRatio="xMinYMax slice" use:CleanClass>
                 {#each { length: animations.stats.value.maxValue } as a, i}

@@ -107,7 +107,7 @@
     <div class="left flx grow column">
         <div class="animation grow">
             {#if animations}
-                <SortAnimation bind:this={svg} {animations} />
+                <SortAnimation bind:this={svg} {animations} on:done={Run} />
             {/if}
             {#if error}
                 <div class="error">{error}</div>

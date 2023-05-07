@@ -12,7 +12,7 @@
         </div>
     {/if}
     <span class="label">{label}</span>
-    <span class="color" style="background:{value};"> <span class="hex">{value || 'transparent'}</span></span>
+    <span class="color" style="background:{value};"> <span class="hex">{value || 'inherit'}</span></span>
     <input type="color" bind:value />
 </label>
 
