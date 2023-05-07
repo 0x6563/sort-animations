@@ -170,7 +170,6 @@ export class WorkspaceAnimation {
                     this.unhighlight();
                 }
                 if (detail.command == 'highlight') {
-                    console.log(detail);
                     this.unhighlight();
                     if (detail.targets) {
                         for (const t of detail.targets) {
