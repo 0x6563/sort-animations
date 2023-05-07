@@ -64,6 +64,7 @@
             {/if}
         {/each}
         <Animate animations={animations.animations} />
+        <!-- Animations by https://0x6563.github.io/sort-animations -->
     </svg>
 {/if}
 

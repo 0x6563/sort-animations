@@ -52,19 +52,26 @@ export class EventLog {
 }
 
 export type EventLogEvent = EventLogEventCall | EventLogEventChangeAdd | EventLogEventChangeAssign | EventLogEventChangeDelete | EventLogEventAnimation | EventLogEventCustom | EventLogEventReferenceAdd | EventLogEventReferenceDelete;
-type EventLogEventAnimation = EventLogEventAnimationGeneral | EventLogEventAnimationColor;
+type EventLogEventAnimation = EventLogEventAnimationGeneral | EventLogEventAnimationColor | EventLogEventAnimationHighlight;
 interface EventLogEventAnimationGeneral {
     event: 'animation'
     detail: {
-        command: 'batch-start' | 'batch-end' | 'animate' | 'highlight' | 'unhighlight';
+        command: 'batch-start' | 'batch-end' | 'animate' | 'unhighlight';
     }
 }
 interface EventLogEventAnimationColor {
     event: 'animation'
     detail: {
         command: 'color';
-        target?: number;
+        targets?: number[];
         color: 'tint' | 'shade' | 'fill'
+    }
+}
+interface EventLogEventAnimationHighlight {
+    event: 'animation'
+    detail: {
+        command: 'highlight';
+        targets?: number[];
     }
 }
 interface EventLogEventCustom {

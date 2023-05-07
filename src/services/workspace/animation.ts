@@ -167,15 +167,27 @@ export class WorkspaceAnimation {
                     callStack--;
                 }
                 if (detail.command == 'unhighlight') {
-                    for (const id in this.staged.highlight.cell) {
-                        this.staged.elements[id].highlight = false;
-                    }
-                    for (const id in this.staged.highlight.graph) {
-                        this.staged.elements[id].highlight = false;
+                    this.unhighlight();
+                }
+                if (detail.command == 'highlight') {
+                    console.log(detail);
+                    this.unhighlight();
+                    if (detail.targets) {
+                        for (const t of detail.targets) {
+                            this.highlight(t);
+                        }
                     }
                 }
                 if (detail.command == 'color') {
-                    this.colorElement(detail.target, detail.color);
+                    if (!(detail.targets?.length)) {
+                        for (let i = 0; i < this.staged.elements.length; i++) {
+                            this.colorElement(i, detail.color);
+                        }
+                    } else {
+                        for (const t of detail.targets) {
+                            this.colorElement(t, detail.color);
+                        }
+                    }
                 }
             }
 
@@ -205,12 +217,8 @@ export class WorkspaceAnimation {
         }
     }
 
-    colorElement(id: number | undefined, color: 'tint' | 'shade' | 'fill') {
-        if (typeof id != 'number') {
-            for (let i = 0; i < this.staged.elements.length; i++) {
-                this.colorElement(i, color);
-            }
-        } else if (this.staged.elements[id].type == 'array') {
+    colorElement(id: number, color: 'tint' | 'shade' | 'fill') {
+        if (this.staged.elements[id].type == 'array') {
             this.staged.elements[id].color = color;
             for (const i in (this.staged.elements[id] as GraphUIState).children) {
                 this.colorElement(parseInt(i), color);
@@ -226,7 +234,12 @@ export class WorkspaceAnimation {
             this.staged.elements[id].highlight = false;
             this.staged.changes.color.push(parseInt(id));
         }
+        for (const id in this.staged.highlight.graph) {
+            this.staged.elements[id].highlight = false;
+            this.staged.changes.color.push(parseInt(id));
+        }
         this.staged.highlight.cell = {};
+        this.staged.highlight.graph = {};
     }
 
     adjustColors() {

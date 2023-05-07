@@ -10,8 +10,8 @@ import MergeSortBottomUp from "./algorithms/mergesort-bottomup?compiled"
 import SelectionSort from "./algorithms/selectionsort?compiled"
 export const SortMethods = {
     BubbleSort: BubbleSort,
-    'QuickSort Lomuto': LomutoQuickSort,
-    'QuickSort Hoare': HoareQuickSort,
+    'QuickSort - Lomuto Edition': LomutoQuickSort,
+    'QuickSort - Hoare Edition': HoareQuickSort,
     'MergeSort TopDown': MergeSortTopDown,
     'MergeSort BottomUp': MergeSortBottomUp,
     'Selection Sort': SelectionSort,

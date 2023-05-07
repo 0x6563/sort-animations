@@ -66,56 +66,72 @@ declare function Untrack(source: List): void;
 
 // Shade
 /**
- * Sets a value to the Shade color .
- * @param source 
+ * Set element(s) to Shade color
+ * @param values elements to Shade
  */
-declare function Shade(source: Value): void;
+declare function Shade(...values: (List | Value)[]): void;
 /**
- * Sets a list to the Shade color .
- * @param source 
+ * Set element(s) to Shade color
+ * @param values elements to Shade
  */
-declare function Shade(source: List): void;
+declare function Shade(values: (List | Value)[]): void;
 /**
- * Resets all elements to the shade colorr.
+ * Resets all elements to the Shade color.
  */
 declare function Shade(): void;
 
 // Tint
 /**
- * Sets a value to the Tint color.
- * @param source 
+ * Set element(s) to Tint color
+ * @param values elements to Tint
  */
-declare function Tint(source: Value): void;
+declare function Tint(...values: (List | Value)[]): void;
 /**
- * Sets a list to the Tint color.
- * @param source 
+ * Set element(s) to Tint color
+ * @param values elements to Tint
  */
-declare function Tint(source: List): void;
-
+declare function Tint(values: (List | Value)[]): void;
 /**
- * Resets all elements to the tint colorr.
+ * Resets all elements to the Tint color.
  */
 declare function Tint(): void;
 
 // Fill
 /**
- * Resets a value to the Fill color.
- * @param source 
+ * Set element(s) to fill color
+ * @param values elements to Fill
  */
-declare function Fill(source: Value): void;
+declare function Fill(...values: (List | Value)[]): void;
 /**
- * Resets a list to the Fill color.
- * @param source 
+ * Set element(s) to fill color
+ * @param values elements to Fill
  */
-declare function Fill(source: List): void;
-
+declare function Fill(values: (List | Value)[]): void;
 /**
- * Resets all elements to the fill colorr.
+ * Resets all elements to the fill color.
  */
 declare function Fill(): void;
 
 
 declare function Unhighlight(): void;
+
+/**
+ * Calling Highlight with no arguments clears highlighted items.
+ */
+declare function Highlight(): void;
+/**
+ * Highlights elements.
+ * Subsequent calls override this
+ * @param values elements to highlight
+ */
+declare function Highlight(...values: (List | Value)[]): void;
+/**
+ * Highlights elements
+ * Subsequent calls override this
+ * @param values elements to highlight
+ */
+declare function Highlight(values: (List | Value)[]): void;
+
 /**
  * Queues all animation events.
  */
@@ -152,6 +168,7 @@ export interface Scope {
     Tint: typeof Tint;
     Fill: typeof Fill;
     Unhighlight: typeof Unhighlight;
+    Highlight: typeof Highlight;
     BatchStart: typeof BatchStart;
     BatchEnd: typeof BatchEnd;
     Animate: typeof Animate;

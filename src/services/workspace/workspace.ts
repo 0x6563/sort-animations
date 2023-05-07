@@ -168,6 +168,7 @@ export class Workspace {
             Shade: this.color('shade'),
             Tint: this.color('tint'),
             Fill: this.color('fill'),
+            Highlight: (...targets) => this.highlight(targets),
             Unhighlight: () => this.log.push('animation', { command: 'unhighlight' }),
             BatchStart: () => this.log.push('animation', { command: 'batch-start' }),
             BatchEnd: () => this.log.push('animation', { command: 'batch-end' }),
@@ -178,11 +179,35 @@ export class Workspace {
     }
 
     private color(color: 'shade' | 'tint' | 'fill') {
-        return (source?: List | Value) => {
-            this.log.push('animation', { command: 'color', target: source ? this.references.id(source) : undefined, color })
+        return (...values) => {
+            const targets: number[] = Array.from(this.traverseIds(values));
+            this.log.push('animation', { command: 'color', targets, color })
         };
     }
+    private highlight(values: (Value | List | Value[] | List[])[]) {
+        const targets: number[] = Array.from(this.traverseIds(values));
+        this.log.push('animation', { command: 'highlight', targets })
+    }
 
+    private traverseIds(values: (Value | List | Value[] | List[])[], visited: Set<number> = new Set()) {
+        const s = this.references.id(values as any);
+        if (typeof s == 'number') {
+            if (visited.has(s)) {
+                return visited;
+            }
+            visited.add(s);
+        }
+        for (const v of values) {
+            const id = this.references.id(v as any);
+            if (typeof id == 'number') {
+                visited.add(id);
+            }
+            if (Array.isArray(v)) {
+                this.traverseIds(v, visited);
+            }
+        }
+        return visited;
+    }
     private wrap<T extends KeysMatching<Workspace, Function>>(call: T): Workspace[T] {
         return ((...args) => {
             this.log.push('call', { call, progress: 'start' });

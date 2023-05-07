@@ -2,7 +2,13 @@
     import type { SVGConfigInput } from '@services/workspace/animation';
     import Number from './inputs/number.svelte';
     import Color from './inputs/color.svelte';
+    import { createEventDispatcher } from 'svelte';
+    import Icon from './icon.svelte';
     export let settings: { svg: SVGConfigInput };
+    const dispatch = createEventDispatcher();
+    function Refresh() {
+        dispatch('refresh');
+    }
 </script>
 
 <div class="settings">
@@ -34,11 +40,23 @@
         <Number label="Height" bind:value={settings.svg.cell.height} />
         <Number label="Width" bind:value={settings.svg.cell.width} />
     </div>
+    <div class="section">
+        <h4>Refresh</h4>
+        <button on:click={Refresh}> <Icon icon="refresh" /></button>
+    </div>
 </div>
 
 <style lang="scss">
     .settings {
         padding: 24px;
         text-align: center;
+    }
+    button {
+        background: none;
+        color: var(--stroke);
+        font-weight: 600;
+        font-size: 24px;
+        outline: none;
+        border: none;
     }
 </style>
