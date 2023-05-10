@@ -85,7 +85,7 @@
         <h2>Sort Animations</h2>
         <a href="https://github.com/0x6563" target="_blank"> by 0x6563</a>
     </div>
-    <div class="setting">
+    <div class="selection">
         <Dropdown bind:value={algorithm} options={algorithms} on:select={() => (edited = algorithm)}>
             <div slot="label" let:label class="setting">
                 <h3 class="variable">{label ? label : 'Custom'}</h3>
@@ -159,7 +159,7 @@
     }
     .signature,
     .actions,
-    .setting {
+    .selection {
         width: 300px;
     }
     .actions {
@@ -200,7 +200,7 @@
     .title,
     .footer {
         height: 50px;
-        .setting {
+        .selection {
             background: var(--fill);
             :global(.container) {
                 background: var(--fill);
@@ -226,5 +226,36 @@
         min-width: 20px;
         text-align: center;
         padding: 1px 6px;
+    }
+
+    @media (max-width: 900px) {
+        .title .actions {
+            display: none;
+        }
+    }
+    @media (max-width: 599px) {
+        .title {
+            display: block !important;
+            height: auto;
+            .signature,
+            .selection {
+                width: 100%;
+            }
+            .selection :global(.container) {
+                width: 100%;
+                position: relative;
+            }
+            .selection :global(.flyout) {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 100%;
+            }
+            h3 {
+                width: auto;
+                max-width: 300px;
+                margin: auto;
+            }
+        }
     }
 </style>
