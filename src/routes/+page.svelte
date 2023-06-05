@@ -23,7 +23,7 @@
     let error;
     let side: '' | 'editor' | 'settings' = '';
     let maxNumbers = 20;
-    let algorithm = algorithms['Sample QuickSort'];
+    let algorithm = algorithms['BubbleSort'];
     let edited = algorithm;
     let worker: undefined | WorkerPromiseResult;
     let starting = false;
@@ -96,11 +96,10 @@
         </Dropdown>
     </div>
     <div class="actions">
-        <a class="btn" href="https://github.com/0x6563/sort-animations" target="_blank"><Icon icon="deployed_code" /></a>
-        <a class="btn" href="https://www.buymeacoffee.com/0x6563" target="_blank"><Icon icon="coffee" /></a>
-        <button class="btn" on:click={Toggle('editor')}><Icon icon="edit" /></button>
+        <button class="btn" on:click={Toggle('editor')}><Icon icon="code" /></button>
         <button class="btn" on:click={Toggle('settings')}><Icon icon="palette" /></button>
-        <button class="btn" on:click={Run}><Icon icon="slideshow" /></button>
+        <a class="btn" href="https://www.buymeacoffee.com/0x6563" target="_blank"><Icon icon="coffee" /></a>
+        <a class="btn" href="https://github.com/0x6563/sort-animations" target="_blank"><Icon icon="deployed_code" /></a>
     </div>
 </div>
 <div class="content flx row grow">
@@ -120,6 +119,10 @@
     <div class="right flx grow column" data-show={side}>
         {#if side == 'editor'}
             <Delay wait={250}>
+                <div class="title flx row spread">
+                    <h2></h2>
+                    <button class="btn" on:click={Run}>Run<Icon icon="play_arrow" /></button>
+                </div>
                 <div class="flx grow column">
                     <Code bind:value={edited} language="javascript" {typings} />
                 </div>
@@ -199,7 +202,7 @@
     }
     .title,
     .footer {
-        height: 50px;
+        height: 50px !important;
         .selection {
             background: var(--fill);
             :global(.container) {
